@@ -1,9 +1,10 @@
+import { PublicNav } from "@/components/ui/public-nav"
 import { Logo } from "@/components/ui/logo"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Brain, Users, Target, Award, Lightbulb, Heart } from "lucide-react"
-import Link from "next/link"
+import { Brain, Users, Target, Heart, Award } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
 export default function AboutPage() {
   const team = [
@@ -59,32 +60,7 @@ export default function AboutPage() {
       </div>
 
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-md shadow-lg">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/">
-            <Logo size="md" />
-          </Link>
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/#features" className="text-gray-700 hover:elimunova-text-gradient transition-all duration-300 font-medium">
-              Features
-            </Link>
-            <Link href="/pricing" className="text-gray-700 hover:elimunova-text-gradient transition-all duration-300 font-medium">
-              Pricing
-            </Link>
-            <Link href="/about" className="elimunova-text-gradient font-medium">
-              About
-            </Link>
-          </nav>
-          <div className="flex items-center space-x-4">
-            <Link href="/auth/signin">
-              <Button variant="outline" className="elimunova-glass border-0 text-gray-700 hover:bg-white/20">Sign In</Button>
-            </Link>
-            <Link href="/auth/signup">
-              <Button className="elimunova-button">Get Started</Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <PublicNav />
 
       {/* Hero Section */}
       <section className="relative z-10 container mx-auto px-4 pt-32 pb-20 text-center">

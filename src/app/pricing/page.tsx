@@ -1,9 +1,10 @@
+import { PublicNav } from "@/components/ui/public-nav"
 import { Logo } from "@/components/ui/logo"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, Star } from "lucide-react"
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
+import { Button } from "@/components/ui/button"
 
 export default async function PricingPage() {
   // Fetch active packages from DB (server component)
@@ -45,32 +46,7 @@ export default async function PricingPage() {
       </div>
 
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-md shadow-lg">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/">
-            <Logo size="md" />
-          </Link>
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/#features" className="text-gray-700 hover:elimunova-text-gradient transition-all duration-300 font-medium">
-              Features
-            </Link>
-            <Link href="/pricing" className="elimunova-text-gradient font-medium">
-              Pricing
-            </Link>
-            <Link href="/about" className="text-gray-700 hover:elimunova-text-gradient transition-all duration-300 font-medium">
-              About
-            </Link>
-          </nav>
-          <div className="flex items-center space-x-4">
-            <Link href="/auth/signin">
-              <Button variant="outline" className="elimunova-glass border-0 text-gray-700 hover:bg-white/20">Sign In</Button>
-            </Link>
-            <Link href="/auth/signup">
-              <Button className="elimunova-button">Get Started</Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <PublicNav />
 
       {/* Hero Section */}
       <section className="relative z-10 container mx-auto px-4 pt-32 pb-20 text-center">
@@ -90,7 +66,7 @@ export default async function PricingPage() {
       <section className="relative z-10 container mx-auto px-4 pb-20">
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {plans.map((plan, index) => (
-            <Card key={plan.name} className={`elimunova-card-gradient group hover:scale-105 transition-all duration-300 relative border-0 ${plan.popular ? 'ring-2 ring-purple-500' : ''}`}>
+            <Card key={plan.name} className={`bg-white/80 backdrop-blur-sm shadow-xl group hover:scale-105 transition-all duration-300 relative border-0 ${plan.popular ? 'ring-2 ring-purple-500' : ''}`}>
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                   <div className="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-4 py-1 rounded-full text-sm font-medium flex items-center">
