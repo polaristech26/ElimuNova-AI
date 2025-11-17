@@ -20,14 +20,14 @@ export const metadata: Metadata = {
   authors: [{ name: "ElimuNova AI Team" }],
   icons: {
     icon: [
-      { url: '/elimunova.png' },
-      { url: '/elimunova.png', sizes: '32x32', type: 'image/png' },
-      { url: '/elimunova.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon.ico' },
+      { url: '/elimunova.png', sizes: '192x192', type: 'image/png' },
+      { url: '/elimunova.png', sizes: '512x512', type: 'image/png' },
     ],
     apple: [
-      { url: '/elimunova.png' },
+      { url: '/elimunova.png', sizes: '180x180', type: 'image/png' },
     ],
-    shortcut: ['/elimunova.png'],
+    shortcut: '/favicon.ico',
   },
   openGraph: {
     title: "ElimuNova AI - Intelligent Education Platform",
