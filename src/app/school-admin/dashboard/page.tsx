@@ -319,15 +319,15 @@ export default function SchoolAdminDashboard() {
   }
 
   return (
-    <div>
+    <div className="max-w-full overflow-x-hidden">
       {/* Welcome Section */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">
+        <h1 className="text-2xl md:text-3xl font-bold mb-2">
           <span className="edugenius-text-gradient">
             {schoolData?.school?.name ? `${schoolData.school.name} Dashboard` : 'School Admin Dashboard'}
           </span>
         </h1>
-        <p className="text-gray-600">
+        <p className="text-gray-600 text-sm md:text-base">
           {schoolData?.school?.name 
             ? `Manage teachers, students, and operations at ${schoolData.school.name}`
             : 'Manage teachers, students, and school operations'
@@ -336,19 +336,19 @@ export default function SchoolAdminDashboard() {
       </div>
 
         {/* Stats Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
           {statsConfig.map((stat, index) => (
             <Card key={stat.title} className="bg-gradient-to-br from-white via-blue-50 to-purple-50 shadow-lg backdrop-blur-sm group hover:scale-105 transition-all duration-300 border-0">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">
+                <CardTitle className="text-xs md:text-sm font-medium text-gray-600">
                   {stat.title}
                 </CardTitle>
-                <div className={`w-8 h-8 bg-gradient-to-br ${stat.color} rounded-lg flex items-center justify-center`}>
+                <div className={`w-8 h-8 bg-gradient-to-br ${stat.color} rounded-lg flex items-center justify-center flex-shrink-0`}>
                   <stat.icon className="w-4 h-4 text-white" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold edugenius-text-gradient-blue mb-1">
+                <div className="text-xl md:text-2xl font-bold edugenius-text-gradient-blue mb-1 break-words">
                   {stat.value}
                 </div>
                 <p className="text-xs text-gray-500">
@@ -360,7 +360,7 @@ export default function SchoolAdminDashboard() {
         </div>
 
         {/* Quick Actions & School Info */}
-        <div className="grid lg:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 mb-8">
           <Card className="bg-gradient-to-br from-white via-blue-50 to-purple-50 shadow-lg backdrop-blur-sm border-0">
             <CardHeader>
               <CardTitle className="edugenius-text-gradient-blue">Quick Actions</CardTitle>
@@ -407,29 +407,29 @@ export default function SchoolAdminDashboard() {
               <CardDescription>Current school details and settings</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">School Name</span>
-                <span className="text-sm font-medium text-gray-900">{schoolInfo?.name || 'Loading...'}</span>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm text-gray-600 flex-shrink-0">School Name</span>
+                <span className="text-sm font-medium text-gray-900 text-right truncate">{schoolInfo?.name || 'Loading...'}</span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Location</span>
-                <span className="text-sm text-gray-600">{schoolInfo?.address || 'Loading...'}</span>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm text-gray-600 flex-shrink-0">Location</span>
+                <span className="text-sm text-gray-600 text-right truncate">{schoolInfo?.address || 'Loading...'}</span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Package</span>
-                <span className="text-sm text-green-600 font-medium">{schoolInfo?.package || 'Loading...'}</span>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm text-gray-600 flex-shrink-0">Package</span>
+                <span className="text-sm text-green-600 font-medium truncate">{schoolInfo?.package || 'Loading...'}</span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Subscription</span>
-                <span className={`text-sm font-medium ${
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm text-gray-600 flex-shrink-0">Subscription</span>
+                <span className={`text-sm font-medium truncate ${
                   schoolInfo?.subscription === 'ACTIVE' ? 'text-green-600' : 'text-red-600'
                 }`}>
                   {schoolInfo?.subscription || 'Loading...'}
                 </span>
               </div>
               {schoolInfo?.packagePrice && schoolInfo.packagePrice > 0 && (
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Package Price</span>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm text-gray-600 flex-shrink-0">Package Price</span>
                   <span className="text-sm text-blue-600 font-medium">
                     {formatCurrency(schoolInfo.packagePrice)}
                   </span>
@@ -468,7 +468,7 @@ export default function SchoolAdminDashboard() {
         </div>
 
         {/* Teachers and Students Grid */}
-        <div className="grid lg:grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 mb-8">
           {/* Recent Teachers */}
           <Card className="bg-gradient-to-br from-white via-blue-50 to-purple-50 shadow-lg backdrop-blur-sm border-0">
             <CardHeader className="flex flex-row items-center justify-between">
@@ -489,23 +489,23 @@ export default function SchoolAdminDashboard() {
               <div className="space-y-4 max-h-96 overflow-y-auto">
                 {recentTeachers.length > 0 ? (
                   recentTeachers.map((teacher, index) => (
-                    <div key={teacher.id} className="flex items-center justify-between p-4 bg-gradient-to-r from-white/70 to-blue-50/70 backdrop-blur-sm rounded-lg hover:from-white/90 hover:to-blue-50/90 transition-all duration-300 shadow-sm hover:shadow-md">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <div key={teacher.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 bg-gradient-to-r from-white/70 to-blue-50/70 backdrop-blur-sm rounded-lg hover:from-white/90 hover:to-blue-50/90 transition-all duration-300 shadow-sm hover:shadow-md">
+                      <div className="flex items-center space-x-3 min-w-0 flex-1">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
                           <GraduationCap className="w-5 h-5 text-white" />
                         </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{teacher.name}</h3>
-                          <p className="text-sm text-gray-600">{teacher.email}</p>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-semibold text-gray-900 truncate">{teacher.name}</h3>
+                          <p className="text-sm text-gray-600 truncate">{teacher.email}</p>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-4">
-                        <div className="text-right">
+                      <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
+                        <div className="text-left sm:text-right flex-1 sm:flex-initial">
                           <p className="text-sm font-medium text-gray-900">{teacher.students} students</p>
-                          <p className="text-xs text-gray-500">Joined: {teacher.joinDate}</p>
+                          <p className="text-xs text-gray-500 truncate">Joined: {teacher.joinDate}</p>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                        <div className="flex items-center space-x-2 flex-shrink-0">
+                          <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${
                             teacher.status === 'Active' 
                               ? 'bg-green-100 text-green-800' 
                               : 'bg-yellow-100 text-yellow-800'
@@ -581,23 +581,23 @@ export default function SchoolAdminDashboard() {
               <div className="space-y-4 max-h-96 overflow-y-auto">
                 {recentStudents.length > 0 ? (
                   recentStudents.map((student, index) => (
-                    <div key={student.id} className="flex items-center justify-between p-4 bg-gradient-to-r from-white/70 to-blue-50/70 backdrop-blur-sm rounded-lg hover:from-white/90 hover:to-blue-50/90 transition-all duration-300 shadow-sm hover:shadow-md">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                    <div key={student.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 bg-gradient-to-r from-white/70 to-blue-50/70 backdrop-blur-sm rounded-lg hover:from-white/90 hover:to-blue-50/90 transition-all duration-300 shadow-sm hover:shadow-md">
+                      <div className="flex items-center space-x-3 min-w-0 flex-1">
+                        <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center flex-shrink-0">
                           <Users className="w-5 h-5 text-white" />
                         </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{student.name}</h3>
-                          <p className="text-sm text-gray-600">{student.email}</p>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-semibold text-gray-900 truncate">{student.name}</h3>
+                          <p className="text-sm text-gray-600 truncate">{student.email}</p>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-4">
-                        <div className="text-right">
-                          <p className="text-sm font-medium text-gray-900">{student.teacher}</p>
+                      <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
+                        <div className="text-left sm:text-right flex-1 sm:flex-initial">
+                          <p className="text-sm font-medium text-gray-900 truncate">{student.teacher}</p>
                           <p className="text-xs text-gray-500">Teacher</p>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                        <div className="flex items-center space-x-2 flex-shrink-0">
+                          <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${
                             student.status === 'Active' 
                               ? 'bg-green-100 text-green-800' 
                               : 'bg-yellow-100 text-yellow-800'
