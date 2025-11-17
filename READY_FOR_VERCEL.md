@@ -19,10 +19,22 @@ All your local data has been successfully migrated to Neon:
 
 ### Step 1: Push to GitHub
 
+**Easy Way - Run the helper script:**
 ```bash
-git add .
-git commit -m "Ready for production deployment"
-git push origin main
+push-to-github.bat
+```
+
+**Or manually:**
+1. Download GitHub Desktop: https://desktop.github.com/
+2. Sign in and add this repository
+3. Click "Publish repository"
+
+**Or with Personal Access Token:**
+1. Create token: https://github.com/settings/tokens
+2. Run:
+```bash
+git remote set-url origin https://YOUR_TOKEN@github.com/J0SE-CEO/ElimuNova.git
+git push -u origin main
 ```
 
 ### Step 2: Import to Vercel
