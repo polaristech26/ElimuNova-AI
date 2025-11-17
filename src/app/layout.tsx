@@ -18,6 +18,15 @@ export const metadata: Metadata = {
   description: "Transform education with AI-powered lesson plans, schemes of work, and personalized learning experiences.",
   keywords: ["education", "AI", "learning", "teaching", "lesson plans", "schemes of work"],
   authors: [{ name: "ElimuNova AI Team" }],
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#ffffff' },
+  ],
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+  },
   openGraph: {
     title: "ElimuNova AI - Intelligent Education Platform",
     description: "Transform education with AI-powered lesson plans, schemes of work, and personalized learning experiences.",
