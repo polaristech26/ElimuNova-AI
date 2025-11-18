@@ -390,33 +390,34 @@ export default function StudentDashboard() {
   if (!dashboardData) return null
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-8">
+    <div className="max-w-full overflow-x-hidden">
+      <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6 md:space-y-8">
       {/* AI Teacher Header */}
-      <div className="text-center bg-gradient-to-r from-blue-50 via-purple-50 to-cyan-50 rounded-2xl p-8 shadow-lg">
-        <div className="flex items-center justify-center mb-4">
-          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mr-4">
-            <Bot className="w-8 h-8 text-white" />
+      <div className="text-center bg-gradient-to-r from-blue-50 via-purple-50 to-cyan-50 rounded-2xl p-4 md:p-8 shadow-lg">
+        <div className="flex flex-col sm:flex-row items-center justify-center mb-4 gap-3">
+          <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+            <Bot className="w-6 h-6 md:w-8 md:h-8 text-white" />
           </div>
     <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-xl md:text-3xl font-bold text-gray-900">
               Welcome, {dashboardData.student.name}!
         </h1>
-            <p className="text-gray-600 text-lg">
+            <p className="text-gray-600 text-sm md:text-lg">
               Your AI Teacher is ready to guide your learning journey
         </p>
       </div>
                 </div>
-        <div className="flex justify-center space-x-4">
+        <div className="flex flex-col sm:flex-row justify-center gap-3 sm:space-x-4">
           <Button 
             onClick={() => setShowAIChat(true)}
-            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg"
+            className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg"
           >
             <MessageSquare className="w-4 h-4 mr-2" />
             Chat with AI Teacher
           </Button>
           <Button 
             variant="outline" 
-            className="bg-white/70 backdrop-blur-sm"
+            className="w-full sm:w-auto bg-white/70 backdrop-blur-sm"
             onClick={fetchAITeacherInsights}
           >
             <RefreshCw className="w-4 h-4 mr-2" />
@@ -438,45 +439,45 @@ export default function StudentDashboard() {
             </CardDescription>
               </CardHeader>
               <CardContent>
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               <div>
-                <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
-                  <Calendar className="w-4 h-4 mr-2 text-green-600" />
+                <h4 className="font-semibold text-gray-900 mb-2 flex items-center text-sm md:text-base">
+                  <Calendar className="w-4 h-4 mr-2 text-green-600 flex-shrink-0" />
                   Today's Focus
                 </h4>
                 <ul className="space-y-1 text-sm text-gray-600">
                   {(aiInsights.aiTeachingPlan.today || []).map((item, index) => (
-                    <li key={index} className="flex items-center">
-                      <Target className="w-3 h-3 mr-2 text-green-500" />
-                      {item}
+                    <li key={index} className="flex items-start">
+                      <Target className="w-3 h-3 mr-2 mt-0.5 text-green-500 flex-shrink-0" />
+                      <span className="break-words">{item}</span>
                     </li>
                   ))}
                 </ul>
               </div>
               <div>
-                <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
-                  <Clock className="w-4 h-4 mr-2 text-blue-600" />
+                <h4 className="font-semibold text-gray-900 mb-2 flex items-center text-sm md:text-base">
+                  <Clock className="w-4 h-4 mr-2 text-blue-600 flex-shrink-0" />
                   This Week
                 </h4>
                 <ul className="space-y-1 text-sm text-gray-600">
                   {(aiInsights.aiTeachingPlan.thisWeek || []).map((item, index) => (
-                    <li key={index} className="flex items-center">
-                      <BookOpen className="w-3 h-3 mr-2 text-blue-500" />
-                      {item}
+                    <li key={index} className="flex items-start">
+                      <BookOpen className="w-3 h-3 mr-2 mt-0.5 text-blue-500 flex-shrink-0" />
+                      <span className="break-words">{item}</span>
                     </li>
                   ))}
                 </ul>
                         </div>
                         <div>
-                <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
-                  <TrendingUp className="w-4 h-4 mr-2 text-purple-600" />
+                <h4 className="font-semibold text-gray-900 mb-2 flex items-center text-sm md:text-base">
+                  <TrendingUp className="w-4 h-4 mr-2 text-purple-600 flex-shrink-0" />
                   This Month
                 </h4>
                 <ul className="space-y-1 text-sm text-gray-600">
                   {(aiInsights.aiTeachingPlan.thisMonth || []).map((item, index) => (
-                    <li key={index} className="flex items-center">
-                      <Award className="w-3 h-3 mr-2 text-purple-500" />
-                      {item}
+                    <li key={index} className="flex items-start">
+                      <Award className="w-3 h-3 mr-2 mt-0.5 text-purple-500 flex-shrink-0" />
+                      <span className="break-words">{item}</span>
                     </li>
                   ))}
                 </ul>
@@ -499,12 +500,12 @@ export default function StudentDashboard() {
             </CardDescription>
               </CardHeader>
               <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-6">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2 break-words">
                   {aiInsights.currentLesson.title}
                 </h3>
-                <p className="text-gray-600 mb-3">
+                <p className="text-gray-600 mb-3 text-sm md:text-base">
                   Subject: {aiInsights.currentLesson.subject}
                 </p>
                 <div className="mb-4">
@@ -521,16 +522,16 @@ export default function StudentDashboard() {
                     </div>
                 <div className="flex flex-wrap gap-2">
                   {aiInsights.currentLesson.objectives.map((objective, index) => (
-                    <Badge key={index} variant="outline" className="bg-green-50 text-green-700 border-0">
+                    <Badge key={index} variant="outline" className="bg-green-50 text-green-700 border-0 text-xs md:text-sm">
                       {objective}
                     </Badge>
                   ))}
                 </div>
               </div>
-              <div className="ml-6">
+              <div className="w-full lg:w-auto flex-shrink-0">
                 <Button 
                   onClick={() => startAILesson('current')}
-                  className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg"
+                  className="w-full lg:w-auto bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg"
                 >
                   <PlayCircle className="w-4 h-4 mr-2" />
                   Continue Learning
@@ -542,7 +543,7 @@ export default function StudentDashboard() {
       )}
 
       {/* Learning Stats */}
-      <div className="grid md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <Card className="bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-lg border-0">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -611,33 +612,33 @@ export default function StudentDashboard() {
             </CardDescription>
               </CardHeader>
               <CardContent>
-            <div className="flex items-center space-x-4 overflow-x-auto pb-4">
+            <div className="flex items-center space-x-2 md:space-x-4 overflow-x-auto pb-4">
               {(aiInsights.learningPath.completed || []).map((topic, index) => (
-                <div key={index} className="flex items-center">
-                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                <div key={index} className="flex items-center flex-shrink-0">
+                  <div className="w-6 h-6 md:w-8 md:h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-xs md:text-sm font-bold">
                     ✓
                       </div>
-                  <span className="ml-2 text-sm text-gray-600 whitespace-nowrap">{topic}</span>
+                  <span className="ml-1 md:ml-2 text-xs md:text-sm text-gray-600 whitespace-nowrap">{topic}</span>
                   {index < (aiInsights.learningPath.completed || []).length - 1 && (
-                    <div className="w-8 h-0.5 bg-gray-300 mx-2"></div>
+                    <div className="w-4 md:w-8 h-0.5 bg-gray-300 mx-1 md:mx-2"></div>
                   )}
                 </div>
               ))}
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+              <div className="flex items-center flex-shrink-0">
+                <div className="w-6 h-6 md:w-8 md:h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs md:text-sm font-bold">
                   →
                 </div>
-                <span className="ml-2 text-sm font-medium text-blue-600 whitespace-nowrap">
+                <span className="ml-1 md:ml-2 text-xs md:text-sm font-medium text-blue-600 whitespace-nowrap">
                   {aiInsights.learningPath.current || 'Current Topic'}
                 </span>
               </div>
               {(aiInsights.learningPath.upcoming || []).map((topic, index) => (
-                <div key={index} className="flex items-center">
-                  <div className="w-8 h-0.5 bg-gray-300 mx-2"></div>
-                  <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-gray-500 text-sm font-bold">
+                <div key={index} className="flex items-center flex-shrink-0">
+                  <div className="w-4 md:w-8 h-0.5 bg-gray-300 mx-1 md:mx-2"></div>
+                  <div className="w-6 h-6 md:w-8 md:h-8 bg-gray-300 rounded-full flex items-center justify-center text-gray-500 text-xs md:text-sm font-bold">
                     {index + 1}
                       </div>
-                  <span className="ml-2 text-sm text-gray-400 whitespace-nowrap">{topic}</span>
+                  <span className="ml-1 md:ml-2 text-xs md:text-sm text-gray-400 whitespace-nowrap">{topic}</span>
                     </div>
                   ))}
                 </div>
@@ -657,7 +658,7 @@ export default function StudentDashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
             <Link href="/student/lesson-plans">
               <Button className="w-full h-20 bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-lg">
                 <div className="text-center">
@@ -862,6 +863,7 @@ export default function StudentDashboard() {
           </div>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   )
 }
