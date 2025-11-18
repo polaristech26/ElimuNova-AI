@@ -22,7 +22,7 @@ export default function AboutPage() {
     },
     {
       name: "Ezekiel Manyara",
-      role: "Shool Director",
+      role: "School Director & Co-Founder",
       description: "Technology specialist and school administrator",
       image: "/team/ezekiel-manyara.jpg"
     }
