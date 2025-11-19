@@ -188,19 +188,24 @@ export async function POST(request: NextRequest) {
       topics
     }
 
-    let content = {}
+    let content: any = {}
+    let rawContent = ''
     try {
       content = schemeOfWork.content ? JSON.parse(schemeOfWork.content) : {}
+      // Extract the raw content string for parsing
+      rawContent = content.generatedContent || schemeOfWork.content || ''
+      console.log('Parsed content:', { hasGeneratedContent: !!content.generatedContent, contentLength: rawContent.length })
     } catch (error) {
       console.error('Error parsing content:', error)
       content = {}
+      rawContent = schemeOfWork.content || ''
     }
 
     try {
     if (format === 'pdf') {
       // Generate professional HTML for PDF conversion
         console.log('Generating PDF for scheme:', schemeOfWork.title)
-      const htmlContent = generateProfessionalHTML(schemeWithTopics, content)
+      const htmlContent = generateProfessionalHTML(schemeWithTopics, content, rawContent)
       
       return new NextResponse(htmlContent, {
         headers: {
@@ -211,7 +216,7 @@ export async function POST(request: NextRequest) {
     } else if (format === 'word') {
       // Generate professional HTML that can be opened in Word
         console.log('Generating Word document for scheme:', schemeOfWork.title)
-      const wordContent = generateProfessionalWordHTML(schemeWithTopics, content)
+      const wordContent = generateProfessionalWordHTML(schemeWithTopics, content, rawContent)
       
       return new NextResponse(wordContent, {
         headers: {
@@ -556,25 +561,16 @@ function generateProfessionalHTML(schemeOfWork: any, content: any, requestConten
         
         .weekly-schedule h2 {
           color: #2d3748;
-          font-size: 1.8em;
-          margin-bottom: 25px;
+          font-size: 2em;
+          margin-bottom: 30px;
           font-weight: 700;
-          border-bottom: 3px solid #667eea;
-          padding-bottom: 12px;
           text-align: center;
           position: relative;
-        }
-        
-        .weekly-schedule h2::after {
-          content: '';
-          position: absolute;
-          bottom: -3px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 60px;
-          height: 3px;
-          background: linear-gradient(90deg, #667eea, #764ba2);
-          border-radius: 2px;
+          padding: 20px;
+          background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+          border-radius: 12px;
+          border-left: 6px solid #667eea;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
         
         .week {
@@ -651,8 +647,9 @@ function generateProfessionalHTML(schemeOfWork: any, content: any, requestConten
         .lesson-title {
           font-weight: 700;
           color: #2d3748;
-          font-size: 1.2em;
+          font-size: 1.3em;
           flex: 1;
+          line-height: 1.4;
         }
         
         .lesson-meta {
@@ -754,6 +751,184 @@ function generateProfessionalHTML(schemeOfWork: any, content: any, requestConten
           color: #667eea;
         }
         
+            @media screen and (max-width: 768px) {
+          body {
+            font-size: 13px;
+          }
+          
+          .container {
+            padding: 15px;
+            max-width: 100%;
+          }
+          
+          .header {
+            padding: 20px 15px;
+            border-radius: 8px;
+          }
+          
+          .header h1 {
+            font-size: 1.5em;
+          }
+          
+          .header .subtitle {
+            font-size: 0.95em;
+          }
+          
+          .info-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+          }
+          
+          .info-card {
+            padding: 15px;
+          }
+          
+          .objectives {
+            padding: 15px;
+          }
+          
+          .objectives h2 {
+            font-size: 1.1em;
+          }
+          
+          .content-section {
+            padding: 15px;
+          }
+          
+          .content-section h2 {
+            font-size: 1.1em;
+          }
+          
+          .weekly-schedule h2 {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+          }
+          
+          .week {
+            margin-bottom: 20px;
+            border-radius: 8px;
+          }
+          
+          .week-header {
+            padding: 15px;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-start;
+          }
+          
+          .week-header h3 {
+            font-size: 1.1em;
+          }
+          
+          .week-meta {
+            align-self: flex-start;
+          }
+          
+          .lesson {
+            padding: 15px;
+          }
+          
+          .lesson::before {
+            width: 3px;
+          }
+          
+          .lesson-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+          }
+          
+          .lesson-title {
+            font-size: 1.05em;
+          }
+          
+          .lesson-meta {
+            font-size: 0.85em;
+            padding: 6px 12px;
+          }
+          
+          .lesson-description {
+            font-size: 0.95em;
+            margin-bottom: 15px;
+          }
+          
+          .lesson-details {
+            grid-template-columns: 1fr;
+            gap: 15px;
+          }
+          
+          .detail-section {
+            padding: 15px;
+          }
+          
+          .detail-section h4 {
+            font-size: 0.95em;
+          }
+          
+          .detail-section li {
+            font-size: 0.85em;
+            padding: 3px 0;
+          }
+          
+          .footer {
+            margin-top: 30px;
+            padding-top: 15px;
+            font-size: 0.85em;
+          }
+        }
+        
+        @media screen and (max-width: 480px) {
+          body {
+            font-size: 12px;
+          }
+          
+          .container {
+            padding: 10px;
+          }
+          
+          .header {
+            padding: 15px 10px;
+          }
+          
+          .header h1 {
+            font-size: 1.3em;
+          }
+          
+          .header .subtitle {
+            font-size: 0.9em;
+          }
+          
+          .info-card {
+            padding: 12px;
+          }
+          
+          .objectives {
+            padding: 12px;
+          }
+          
+          .content-section {
+            padding: 12px;
+          }
+          
+          .weekly-schedule h2 {
+            font-size: 1.2em;
+          }
+          
+          .week-header {
+            padding: 12px;
+          }
+          
+          .lesson {
+            padding: 12px;
+          }
+          
+          .detail-section {
+            padding: 12px;
+          }
+        }
+        
             @media print {
           body { margin: 0; }
           .container { padding: 15mm; }
@@ -766,7 +941,7 @@ function generateProfessionalHTML(schemeOfWork: any, content: any, requestConten
       <div class="container">
           <div class="header">
           <h1>${schemeOfWork.title}</h1>
-          <p class="subtitle">${schemeOfWork.subject} • ${schemeOfWork.grade} • ${schemeOfWork.term}</p>
+          <p class="subtitle">${schemeOfWork.subject} • ${schemeOfWork.grade}</p>
         </div>
         
         <div class="info-grid">
@@ -777,10 +952,6 @@ function generateProfessionalHTML(schemeOfWork: any, content: any, requestConten
           <div class="info-card">
             <h3>Grade Level</h3>
             <p>${schemeOfWork.grade}</p>
-          </div>
-          <div class="info-card">
-            <h3>Term</h3>
-            <p>${schemeOfWork.term}</p>
           </div>
           <div class="info-card">
             <h3>Duration</h3>
@@ -798,7 +969,8 @@ function generateProfessionalHTML(schemeOfWork: any, content: any, requestConten
         ` : ''}
         
         <div class="weekly-schedule">
-          <h2>Weekly Lesson Schedule</h2>
+          <h2>📚 Weekly Lesson Schedule</h2>
+          ${(parsedWeeks.length > 0 || Object.keys(topicsByWeek).length > 0) ? '' : '<p style="text-align: center; color: #718096; padding: 40px;">No topics or lessons have been added to this scheme of work yet.</p>'}
           ${parsedWeeks.length > 0 ? parsedWeeks.map((week: any) => `
             <div class="week">
               <div class="week-header">
@@ -850,40 +1022,42 @@ function generateProfessionalHTML(schemeOfWork: any, content: any, requestConten
                 `).join('')}
               </div>
             </div>
-          `).join('') : Object.entries(topicsByWeek).map(([week, topics]: [string, any]) => `
+          `).join('') : ''}
+          
+          ${Object.keys(topicsByWeek).length > 0 ? Object.entries(topicsByWeek).map(([week, topics]: [string, any]) => `
             <div class="week">
               <div class="week-header">
                 <h3>Week ${week}</h3>
-                <div class="week-meta">${topics.length} lessons</div>
+                <div class="week-meta">${topics.length} lesson${topics.length !== 1 ? 's' : ''}</div>
               </div>
               <div class="lessons">
                 ${topics.map((topic: any) => `
                   <div class="lesson">
                     <div class="lesson-header">
-                      <div class="lesson-title">${topic.title}</div>
-                      <div class="lesson-meta">Lesson ${topic.lessonNumber} • ${topic.duration} minutes</div>
+                      <div class="lesson-title">${topic.title || 'Untitled Lesson'}</div>
+                      <div class="lesson-meta">Lesson ${topic.lessonNumber} • ${topic.duration || 45} minutes</div>
                     </div>
+                    ${topic.description ? `<div class="lesson-description">${parseContentToStructuredHTML(topic.description)}</div>` : ''}
                     <div class="lesson-details">
-                      ${topic.description ? `<div class="lesson-description">${parseContentToStructuredHTML(topic.description)}</div>` : ''}
-                      ${topic.objectives.length > 0 ? `
+                      ${topic.objectives && topic.objectives.length > 0 ? `
                         <div class="detail-section">
-                          <h4><i class="icon">🎯</i> Learning Objectives</h4>
+                          <h4><span class="icon">🎯</span> Learning Objectives</h4>
                           <ul>
                             ${topic.objectives.map((obj: string) => `<li>${parseContentToStructuredHTML(obj)}</li>`).join('')}
                           </ul>
                         </div>
                       ` : ''}
-                      ${topic.activities.length > 0 ? `
+                      ${topic.activities && topic.activities.length > 0 ? `
                         <div class="detail-section">
-                          <h4><i class="icon">📚</i> Teaching Activities</h4>
+                          <h4><span class="icon">📚</span> Teaching Activities</h4>
                           <ul>
                             ${topic.activities.map((activity: string) => `<li>${parseContentToStructuredHTML(activity)}</li>`).join('')}
                           </ul>
                         </div>
                       ` : ''}
-                      ${topic.resources.length > 0 ? `
+                      ${topic.resources && topic.resources.length > 0 ? `
                         <div class="detail-section">
-                          <h4><i class="icon">📋</i> Resources & Materials</h4>
+                          <h4><span class="icon">📋</span> Resources & Materials</h4>
                           <ul>
                             ${topic.resources.map((resource: string) => `<li>${parseContentToStructuredHTML(resource)}</li>`).join('')}
                           </ul>
@@ -891,7 +1065,7 @@ function generateProfessionalHTML(schemeOfWork: any, content: any, requestConten
                       ` : ''}
                       ${topic.assessment ? `
                         <div class="detail-section">
-                          <h4><i class="icon">📊</i> Assessment</h4>
+                          <h4><span class="icon">📊</span> Assessment</h4>
                           <p>${parseContentToStructuredHTML(topic.assessment)}</p>
                         </div>
                       ` : ''}
@@ -900,7 +1074,7 @@ function generateProfessionalHTML(schemeOfWork: any, content: any, requestConten
                 `).join('')}
               </div>
             </div>
-          `).join('')}
+          `).join('') : ''}
           </div>
         
         ${parsedWeeks.length === 0 && requestContent ? `
@@ -1185,6 +1359,9 @@ function generateProfessionalWordHTML(schemeOfWork: any, content: any, requestCo
 }
 
 function groupTopicsByWeek(topics: any[]) {
+  if (!topics || topics.length === 0) {
+    return {}
+  }
   return topics.reduce((acc, topic) => {
     const week = topic.weekNumber.toString()
     if (!acc[week]) {

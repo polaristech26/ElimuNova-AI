@@ -15,12 +15,15 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { subject, grade, topic, duration, lessonsPerWeek, prerequisites, language = 'english' } = body
+    const { subject, grade, topic, duration, lessonsPerWeek, prerequisites, language = 'english', topics: requestTopics } = body
+
+    // Use topics array if provided, otherwise fall back to single topic
+    const topicsList = requestTopics && requestTopics.length > 0 ? requestTopics : (topic ? [topic] : [])
 
     // Validate required fields
-    if (!subject || !grade || !topic || !duration) {
+    if (!subject || !grade || topicsList.length === 0 || !duration) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Missing required fields: subject, grade, topics, and duration are required' },
         { status: 400 }
       )
     }
@@ -28,12 +31,16 @@ export async function POST(request: NextRequest) {
     // Filter out empty prerequisites
     const filteredPrerequisites = prerequisites ? prerequisites.filter((prereq: string) => prereq.trim() !== '') : []
 
+    console.log('Generating scheme of work for topics:', topicsList)
+
     const schemeOfWorkRequest = {
       subject,
       grade,
-      term: topic, // Using topic as term for now
-      topics: [topic], // Convert single topic to array
-      duration: parseInt(duration)
+      term: topicsList[0], // Use first topic as term for backward compatibility
+      topics: topicsList, // Use all topics
+      duration: parseInt(duration),
+      lessonsPerWeek: lessonsPerWeek ? parseInt(lessonsPerWeek) : 5,
+      prerequisites: filteredPrerequisites
     }
 
     // Generate scheme of work using AI service

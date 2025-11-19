@@ -221,11 +221,16 @@ CRITICAL REQUIREMENTS:
 4. Each lesson must have all sections: Objectives, Teaching Activities, Resources and Materials, Assessment
 5. Use bullet points (•) for all lists
 6. Do not skip any lessons or weeks
-7. MANDATORY: Cover ALL topics provided: ${request.topics.join(', ')} - each topic must appear in at least one lesson
-8. Distribute the topics across different weeks and lessons
+7. ⚠️ MANDATORY - MUST COVER ALL ${request.topics.length} TOPICS: ${request.topics.map((t, i) => `${i + 1}. ${t}`).join(', ')}
+   - Each topic MUST appear in at least one full lesson with complete details
+   - Do NOT skip any topic from the list
+   - Dedicate sufficient lessons to each topic based on its complexity
+8. Distribute the topics across different weeks and lessons logically
 9. Each lesson should be ${request.lessonDuration || 45} minutes long
-10. Ensure all topics are covered within the ${request.duration} weeks
-11. If you have multiple topics, dedicate different weeks to different topics or combine related topics in lessons`
+10. For ${request.topics.length} topics over ${request.duration} weeks, plan approximately ${Math.ceil((request.duration * (request.lessonsPerWeek || 5)) / request.topics.length)} lessons per topic
+11. If you have multiple topics, dedicate different weeks or consecutive lessons to each topic
+12. Start each new major topic with "**Week X: [Topic Name]**" to clearly show topic coverage
+13. VERIFICATION: Before finishing, ensure EVERY topic from this list appears: ${request.topics.join(' | ')}`
 
       const completion = await openai.chat.completions.create({
         model: "openai/gpt-3.5-turbo",
@@ -233,8 +238,8 @@ CRITICAL REQUIREMENTS:
           {
             role: "system",
             content: isKiswahili 
-              ? "You are an expert curriculum developer specializing in creating comprehensive schemes of work in Swahili language. You have deep knowledge of Kiswahili curriculum, Swahili teaching methods, and Tanzanian/Kenyan education systems. Focus on progressive learning, clear objectives, and practical implementation strategies. CRITICAL: Always respond entirely in Swahili language for Kiswahili subjects."
-              : "You are an expert curriculum developer specializing in creating comprehensive schemes of work. Focus on progressive learning, clear objectives, and practical implementation strategies. CRITICAL: Always respond entirely in English language for all subjects except Kiswahili."
+              ? "You are an expert curriculum developer specializing in creating comprehensive schemes of work in Swahili language. You have deep knowledge of Kiswahili curriculum, Swahili teaching methods, and Tanzanian/Kenyan education systems. Focus on progressive learning, clear objectives, and practical implementation strategies. CRITICAL: Always respond entirely in Swahili language for Kiswahili subjects. IMPORTANT: You MUST cover ALL topics provided in the request - never skip any topic."
+              : "You are an expert curriculum developer specializing in creating comprehensive schemes of work. Focus on progressive learning, clear objectives, and practical implementation strategies. CRITICAL: Always respond entirely in English language for all subjects except Kiswahili. IMPORTANT: You MUST cover ALL topics provided in the request - never skip any topic, ensure each topic gets dedicated lesson content."
           },
           {
             role: "user",
