@@ -1,3 +1,4 @@
+import { PublicNav } from "@/components/ui/public-nav"
 import { Logo } from "@/components/ui/logo"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -57,59 +58,35 @@ export default function APIPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 relative overflow-hidden">
+      <div className="max-w-full overflow-x-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl edugenius-animate-float"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-pink-400/20 to-rose-600/20 rounded-full blur-3xl edugenius-animate-float" style={{animationDelay: '2s'}}></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl elimunova-animate-float"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-pink-400/20 to-rose-600/20 rounded-full blur-3xl elimunova-animate-float" style={{animationDelay: '2s'}}></div>
       </div>
 
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-md shadow-lg">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/">
-            <Logo size="md" />
-          </Link>
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/#features" className="text-gray-700 hover:edugenius-text-gradient transition-all duration-300 font-medium">
-              Features
-            </Link>
-            <Link href="/pricing" className="text-gray-700 hover:edugenius-text-gradient transition-all duration-300 font-medium">
-              Pricing
-            </Link>
-            <Link href="/about" className="text-gray-700 hover:edugenius-text-gradient transition-all duration-300 font-medium">
-              About
-            </Link>
-          </nav>
-          <div className="flex items-center space-x-4">
-            <Link href="/auth/signin">
-              <Button variant="outline" className="edugenius-glass border-0 text-gray-700 hover:bg-white/20">Sign In</Button>
-            </Link>
-            <Link href="/auth/signup">
-              <Button className="edugenius-button">Get Started</Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <PublicNav />
 
       {/* Hero Section */}
       <section className="relative z-10 container mx-auto px-4 pt-32 pb-20 text-center">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            <span className="edugenius-text-gradient-rainbow">ElimuNova AI</span>
+            <span className="elimunova-text-gradient-rainbow">ElimuNova AI</span>
             <br />
-            <span className="edugenius-text-gradient">API Documentation</span>
+            <span className="elimunova-text-gradient">API Documentation</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
             Integrate our AI-powered educational tools into your applications with our 
             comprehensive REST API and SDKs.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="edugenius-button text-lg px-8 py-4">
+            <Button size="lg" className="elimunova-button text-lg px-8 py-4">
               <Code className="mr-2 h-5 w-5" />
               Get API Key
             </Button>
             <Link href="/docs">
-              <Button size="lg" variant="outline" className="edugenius-glass border-0 text-lg px-8 py-4 hover:bg-white/20">
+              <Button size="lg" variant="outline" className="elimunova-glass border-0 text-lg px-8 py-4 hover:bg-white/20">
                 View Full Docs
               </Button>
             </Link>
@@ -122,7 +99,7 @@ export default function APIPage() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              <span className="edugenius-text-gradient">API Features</span>
+              <span className="elimunova-text-gradient">API Features</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Everything you need to build powerful educational applications
@@ -131,12 +108,12 @@ export default function APIPage() {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <Card key={feature.title} className="edugenius-card-gradient group hover:scale-105 transition-all duration-300 border-0">
+              <Card key={feature.title} className="elimunova-card-gradient group hover:scale-105 transition-all duration-300 border-0">
                 <CardHeader className="text-center">
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                     <feature.icon className="h-8 w-8 text-white" />
                   </div>
-                  <CardTitle className="edugenius-text-gradient-blue">{feature.title}</CardTitle>
+                  <CardTitle className="elimunova-text-gradient-blue">{feature.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <CardDescription className="text-center">
@@ -154,7 +131,7 @@ export default function APIPage() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              <span className="edugenius-text-gradient">API Endpoints</span>
+              <span className="elimunova-text-gradient">API Endpoints</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Explore our comprehensive API endpoints for all AI features
@@ -163,7 +140,7 @@ export default function APIPage() {
           
           <div className="max-w-4xl mx-auto space-y-6">
             {endpoints.map((endpoint, index) => (
-              <Card key={endpoint.path} className="edugenius-card-gradient border-0">
+              <Card key={endpoint.path} className="elimunova-card-gradient border-0">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
@@ -203,9 +180,9 @@ export default function APIPage() {
       <section className="relative z-10 py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <Card className="edugenius-card-gradient border-0">
+            <Card className="elimunova-card-gradient border-0">
               <CardHeader>
-                <CardTitle className="edugenius-text-gradient-blue">Quick Start Example</CardTitle>
+                <CardTitle className="elimunova-text-gradient-blue">Quick Start Example</CardTitle>
                 <CardDescription>
                   Generate a lesson plan with just a few lines of code
                 </CardDescription>
@@ -247,7 +224,7 @@ console.log(lessonPlan);`}
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              <span className="edugenius-text-gradient">SDKs & Libraries</span>
+              <span className="elimunova-text-gradient">SDKs & Libraries</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Use our official SDKs to integrate ElimuNova AI into your applications
@@ -255,52 +232,52 @@ console.log(lessonPlan);`}
           </div>
           
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <Card className="edugenius-card-gradient group hover:scale-105 transition-all duration-300 border-0">
+            <Card className="elimunova-card-gradient group hover:scale-105 transition-all duration-300 border-0">
               <CardHeader className="text-center">
                 <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4">
                   <Code className="h-8 w-8 text-white" />
                 </div>
-                <CardTitle className="edugenius-text-gradient-blue">JavaScript/Node.js</CardTitle>
+                <CardTitle className="elimunova-text-gradient-blue">JavaScript/Node.js</CardTitle>
               </CardHeader>
               <CardContent className="text-center">
                 <CardDescription className="mb-4">
                   Official SDK for JavaScript and Node.js applications
                 </CardDescription>
-                <Button className="edugenius-button w-full">
+                <Button className="elimunova-button w-full">
                   Install Package
                 </Button>
               </CardContent>
             </Card>
 
-            <Card className="edugenius-card-gradient group hover:scale-105 transition-all duration-300 border-0">
+            <Card className="elimunova-card-gradient group hover:scale-105 transition-all duration-300 border-0">
               <CardHeader className="text-center">
                 <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mx-auto mb-4">
                   <Code className="h-8 w-8 text-white" />
                 </div>
-                <CardTitle className="edugenius-text-gradient-blue">Python</CardTitle>
+                <CardTitle className="elimunova-text-gradient-blue">Python</CardTitle>
               </CardHeader>
               <CardContent className="text-center">
                 <CardDescription className="mb-4">
                   Python SDK for data science and educational applications
                 </CardDescription>
-                <Button className="edugenius-button w-full">
+                <Button className="elimunova-button w-full">
                   Install Package
                 </Button>
               </CardContent>
             </Card>
 
-            <Card className="edugenius-card-gradient group hover:scale-105 transition-all duration-300 border-0">
+            <Card className="elimunova-card-gradient group hover:scale-105 transition-all duration-300 border-0">
               <CardHeader className="text-center">
                 <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl flex items-center justify-center mx-auto mb-4">
                   <Code className="h-8 w-8 text-white" />
                 </div>
-                <CardTitle className="edugenius-text-gradient-blue">PHP</CardTitle>
+                <CardTitle className="elimunova-text-gradient-blue">PHP</CardTitle>
               </CardHeader>
               <CardContent className="text-center">
                 <CardDescription className="mb-4">
                   PHP SDK for web applications and content management systems
                 </CardDescription>
-                <Button className="edugenius-button w-full">
+                <Button className="elimunova-button w-full">
                   Install Package
                 </Button>
               </CardContent>
@@ -310,7 +287,7 @@ console.log(lessonPlan);`}
       </section>
 
       {/* CTA Section */}
-      <section className="relative z-10 py-20 edugenius-gradient-rainbow">
+      <section className="relative z-10 py-20 elimunova-gradient-rainbow">
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="relative container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
@@ -320,7 +297,7 @@ console.log(lessonPlan);`}
             Get your API key and start building amazing educational applications today.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="edugenius-button-secondary text-lg px-8 py-4">
+            <Button size="lg" className="elimunova-button-secondary text-lg px-8 py-4">
               Get API Key
             </Button>
             <Link href="/docs">
@@ -344,27 +321,27 @@ console.log(lessonPlan);`}
               </p>
             </div>
             <div>
-              <h3 className="font-semibold mb-4 edugenius-text-gradient-blue">Product</h3>
+              <h3 className="font-semibold mb-4 elimunova-text-gradient-blue">Product</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/#features" className="hover:edugenius-text-gradient transition-all duration-300">Features</Link></li>
-                <li><Link href="/pricing" className="hover:edugenius-text-gradient transition-all duration-300">Pricing</Link></li>
-                <li><Link href="/api" className="hover:edugenius-text-gradient transition-all duration-300">API</Link></li>
+                <li><Link href="/#features" className="hover:elimunova-text-gradient transition-all duration-300">Features</Link></li>
+                <li><Link href="/pricing" className="hover:elimunova-text-gradient transition-all duration-300">Pricing</Link></li>
+                <li><Link href="/api" className="hover:elimunova-text-gradient transition-all duration-300">API</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-4 edugenius-text-gradient-blue">Support</h3>
+              <h3 className="font-semibold mb-4 elimunova-text-gradient-blue">Support</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/help" className="hover:edugenius-text-gradient transition-all duration-300">Help Center</Link></li>
-                <li><Link href="/contact" className="hover:edugenius-text-gradient transition-all duration-300">Contact Us</Link></li>
-                <li><Link href="/docs" className="hover:edugenius-text-gradient transition-all duration-300">Documentation</Link></li>
+                <li><Link href="/help" className="hover:elimunova-text-gradient transition-all duration-300">Help Center</Link></li>
+                <li><Link href="/contact" className="hover:elimunova-text-gradient transition-all duration-300">Contact Us</Link></li>
+                <li><Link href="/docs" className="hover:elimunova-text-gradient transition-all duration-300">Documentation</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-4 edugenius-text-gradient-blue">Company</h3>
+              <h3 className="font-semibold mb-4 elimunova-text-gradient-blue">Company</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/about" className="hover:edugenius-text-gradient transition-all duration-300">About</Link></li>
-                <li><Link href="/privacy" className="hover:edugenius-text-gradient transition-all duration-300">Privacy</Link></li>
-                <li><Link href="/terms" className="hover:edugenius-text-gradient transition-all duration-300">Terms</Link></li>
+                <li><Link href="/about" className="hover:elimunova-text-gradient transition-all duration-300">About</Link></li>
+                <li><Link href="/privacy" className="hover:elimunova-text-gradient transition-all duration-300">Privacy</Link></li>
+                <li><Link href="/terms" className="hover:elimunova-text-gradient transition-all duration-300">Terms</Link></li>
               </ul>
             </div>
           </div>
@@ -376,7 +353,7 @@ console.log(lessonPlan);`}
                 href="https://infinititechsolutions.org/" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="edugenius-text-gradient hover:underline transition-all duration-300"
+                className="elimunova-text-gradient hover:underline transition-all duration-300"
               >
                 InfinitiTech Solutions
               </a>
@@ -384,6 +361,7 @@ console.log(lessonPlan);`}
           </div>
         </div>
       </footer>
+      </div>
     </div>
   )
 }

@@ -1,3 +1,5 @@
+"use client"
+
 import { PublicNav } from "@/components/ui/public-nav"
 import { Logo } from "@/components/ui/logo"
 import { Button } from "@/components/ui/button"
@@ -30,25 +32,29 @@ export default function HelpPage() {
       icon: BookOpen,
       title: "Getting Started Guide",
       description: "Learn the basics of using ElimuNova AI",
-      type: "Guide"
+      type: "Guide",
+      href: "/help/getting-started"
     },
     {
       icon: Video,
       title: "Video Tutorials",
       description: "Watch step-by-step video tutorials",
-      type: "Video"
+      type: "Video",
+      href: "/help/video-tutorials"
     },
     {
       icon: FileText,
       title: "Best Practices",
       description: "Tips and tricks for effective teaching",
-      type: "Article"
+      type: "Article",
+      href: "/help/best-practices"
     },
     {
       icon: MessageCircle,
       title: "Community Forum",
       description: "Connect with other educators",
-      type: "Community"
+      type: "Community",
+      href: "/help/community"
     }
   ]
 
@@ -102,24 +108,26 @@ export default function HelpPage() {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {resources.map((resource, index) => (
-              <Card key={resource.title} className="elimunova-card-gradient group hover:scale-105 transition-all duration-300 cursor-pointer border-0">
-                <CardHeader className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <resource.icon className="h-8 w-8 text-white" />
-                  </div>
-                  <div className="text-sm font-medium text-blue-600 mb-2">{resource.type}</div>
-                  <CardTitle className="elimunova-text-gradient-blue">{resource.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-center mb-4">
-                    {resource.description}
-                  </CardDescription>
-                  <Button variant="outline" className="w-full elimunova-glass">
-                    View Resource
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </CardContent>
-              </Card>
+              <Link key={resource.title} href={resource.href}>
+                <Card className="elimunova-card-gradient group hover:scale-105 transition-all duration-300 cursor-pointer border-0">
+                  <CardHeader className="text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                      <resource.icon className="h-8 w-8 text-white" />
+                    </div>
+                    <div className="text-sm font-medium text-blue-600 mb-2">{resource.type}</div>
+                    <CardTitle className="elimunova-text-gradient-blue">{resource.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-center mb-4">
+                      {resource.description}
+                    </CardDescription>
+                    <Button variant="outline" className="w-full elimunova-glass">
+                      View Resource
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         </div>
@@ -198,7 +206,12 @@ export default function HelpPage() {
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                   </Link>
-                  <Button size="lg" variant="outline" className="elimunova-glass border-0 text-lg px-8 py-4 hover:bg-white/20">
+                  <Button 
+                    size="lg" 
+                    variant="outline" 
+                    className="elimunova-glass border-0 text-lg px-8 py-4 hover:bg-white/20"
+                    onClick={() => window.open('https://wa.me/254791269918?text=Hello! I need help with ElimuNova AI platform.', '_blank')}
+                  >
                     Start Live Chat
                   </Button>
                 </div>

@@ -1,9 +1,11 @@
+"use client"
+
 import { PublicNav } from "@/components/ui/public-nav"
 import { Logo } from "@/components/ui/logo"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Mail, Phone, MapPin, Clock, Send } from "lucide-react"
+import { Mail, Phone, MapPin, Clock, Send, MessageCircle, Calendar } from "lucide-react"
 import Link from "next/link"
 
 export default function ContactPage() {
@@ -124,43 +126,65 @@ export default function ContactPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <div className="flex items-center space-x-4 p-3 rounded-lg hover:bg-blue-50/50 transition-colors duration-300 group cursor-pointer">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                       <Mail className="w-6 h-6 text-white" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">Email Address</h3>
-                      <p className="text-gray-600">info@infinititechsolutions.org</p>
+                      <a 
+                        href="mailto:info@infinititechsolutions.org" 
+                        className="text-blue-600 hover:text-blue-800 transition-colors duration-300 font-medium"
+                      >
+                        info@infinititechsolutions.org
+                      </a>
                     </div>
                   </div>
                   
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
+                  <div className="flex items-center space-x-4 p-3 rounded-lg hover:bg-purple-50/50 transition-colors duration-300 group">
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                       <Phone className="w-6 h-6 text-white" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">Phone / WhatsApp</h3>
-                      <p className="text-gray-600">+254 791 269 918</p>
+                      <div className="flex flex-col gap-1">
+                        <a 
+                          href="tel:+254791269918" 
+                          className="text-blue-600 hover:text-blue-800 transition-colors duration-300 font-medium"
+                        >
+                          +254 791 269 918
+                        </a>
+                        <button
+                          onClick={() => window.open('https://wa.me/254791269918?text=Hello! I need help with ElimuNova AI platform.', '_blank')}
+                          className="text-green-600 hover:text-green-800 transition-colors duration-300 text-sm text-left font-medium hover:underline"
+                        >
+                          💬 Chat on WhatsApp
+                        </button>
+                      </div>
                     </div>
                   </div>
                   
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg flex items-center justify-center">
+                  <div className="flex items-center space-x-4 p-3 rounded-lg hover:bg-pink-50/50 transition-colors duration-300 group">
+                    <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                       <MapPin className="w-6 h-6 text-white" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">Office Address</h3>
-                      <p className="text-gray-600">Nakuru, Kenya</p>
+                      <p className="text-gray-600 font-medium">Nakuru, Kenya</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-rose-500 to-red-600 rounded-lg flex items-center justify-center">
+                  <div className="flex items-center space-x-4 p-3 rounded-lg hover:bg-rose-50/50 transition-colors duration-300 group">
+                    <div className="w-12 h-12 bg-gradient-to-br from-rose-500 to-red-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                       <Clock className="w-6 h-6 text-white" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">Business Hours</h3>
-                      <p className="text-gray-600">Mon - Fri: 8:00 AM - 6:00 PM EAT<br />Sat: 9:00 AM - 4:00 PM EAT<br />Sun: Closed</p>
+                      <div className="text-gray-600 text-sm space-y-1">
+                        <p className="font-medium">Mon - Fri: 8:00 AM - 6:00 PM EAT</p>
+                        <p className="font-medium">Sat: 9:00 AM - 4:00 PM EAT</p>
+                        <p className="font-medium">Sun: Closed</p>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -173,21 +197,46 @@ export default function ContactPage() {
                     Need immediate help? Try these options
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3">
                   <Link href="/help">
-                    <Button variant="outline" className="w-full elimunova-glass justify-start">
-                      <Mail className="mr-2 h-4 w-4" />
-                      Browse Help Center
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start h-12 px-4 bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 border-0 transition-all duration-300 group"
+                    >
+                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-300">
+                        <Mail className="h-4 w-4 text-white" />
+                      </div>
+                      <div className="text-left">
+                        <div className="font-semibold text-gray-900">Browse Help Center</div>
+                        <div className="text-xs text-gray-600">Find answers to common questions</div>
+                      </div>
                     </Button>
                   </Link>
-                  <Button variant="outline" className="w-full elimunova-glass justify-start">
-                    <Phone className="mr-2 h-4 w-4" />
-                    Start Live Chat
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start h-12 px-4 bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 border-0 transition-all duration-300 group"
+                    onClick={() => window.open('https://wa.me/254791269918?text=Hello! I need help with ElimuNova AI platform.', '_blank')}
+                  >
+                    <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-300">
+                      <MessageCircle className="h-4 w-4 text-white" />
+                    </div>
+                    <div className="text-left">
+                      <div className="font-semibold text-gray-900">Start Live Chat</div>
+                      <div className="text-xs text-gray-600">Get instant help via WhatsApp</div>
+                    </div>
                   </Button>
                   <Link href="/demo">
-                    <Button variant="outline" className="w-full elimunova-glass justify-start">
-                      <Mail className="mr-2 h-4 w-4" />
-                      Schedule a Demo
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start h-12 px-4 bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 border-0 transition-all duration-300 group"
+                    >
+                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-300">
+                        <Calendar className="h-4 w-4 text-white" />
+                      </div>
+                      <div className="text-left">
+                        <div className="font-semibold text-gray-900">Schedule a Demo</div>
+                        <div className="text-xs text-gray-600">Book a personalized walkthrough</div>
+                      </div>
                     </Button>
                   </Link>
                 </CardContent>
