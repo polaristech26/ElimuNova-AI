@@ -62,9 +62,10 @@ export default function EnrollStudentModal({ isOpen, onClose, onSuccess, classes
       newErrors.email = 'Email is invalid'
     }
 
-    if (!formData.classId) {
-      newErrors.classId = 'Class selection is required'
-    }
+    // Class selection is optional for independent teachers
+    // if (!formData.classId) {
+    //   newErrors.classId = 'Class selection is required'
+    // }
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -351,8 +352,8 @@ export default function EnrollStudentModal({ isOpen, onClose, onSuccess, classes
                     </SelectItem>
                   ))
                 ) : (
-                  <SelectItem value="no-classes" disabled>
-                    No classes available
+                  <SelectItem value="no-classes">
+                    No class (Independent student)
                   </SelectItem>
                 )}
               </SelectContent>

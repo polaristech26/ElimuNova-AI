@@ -592,14 +592,15 @@ export default function BillingPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center space-x-2 mb-1">
                             <h3 className="text-sm font-medium text-gray-900 truncate">
-                              {subscription.school.name}
+                              {subscription.school?.name || 
+                               (subscription.user ? `${subscription.user.firstName} ${subscription.user.lastName}` : 'Independent User')}
                             </h3>
                             <Badge className={getStatusColor(subscription.status)}>
                               {subscription.status}
                             </Badge>
                           </div>
                           <p className="text-sm text-gray-500 truncate">
-                            {subscription.package.name} • {formatCurrency(subscription.amount)}
+                            {subscription.package?.name || 'Unknown Package'} • {formatCurrency(subscription.amount)}
                           </p>
                           <p className="text-xs text-gray-400">
                             {formatDate(subscription.startDate)} - {formatDate(subscription.endDate)}
@@ -775,7 +776,7 @@ export default function BillingPage() {
                             </Badge>
                           </div>
                           <p className="text-sm text-gray-500 truncate">
-                            {invoice.subscription.school.name} • {formatCurrency(invoice.totalAmount)}
+                            {invoice.subscription.school?.name || 'Unknown School'} • {formatCurrency(invoice.totalAmount)}
                           </p>
                           <p className="text-xs text-gray-400">
                             Due: {formatDate(invoice.dueDate)}

@@ -28,10 +28,12 @@ export async function GET(req: NextRequest) {
 
     console.log('✅ Teacher found:', teacher.id, 'School:', teacher.schoolId)
 
-    // Get students from the same school
+    // Get students - for independent teachers, get students assigned to them directly
     const students = await prisma.student.findMany({
-      where: {
+      where: teacher.schoolId ? {
         schoolId: teacher.schoolId
+      } : {
+        teacherId: teacher.id
       },
       include: {
         user: {

@@ -1,6 +1,8 @@
 "use client"
 
 import { useSchoolInfo } from '@/hooks/use-school-info'
+import { IndependentUserWelcome } from '@/components/onboarding/independent-user-welcome'
+import { SubscriptionAlert } from '@/components/subscription/subscription-alert'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -142,7 +144,7 @@ interface AITeacherInsights {
 
 export default function StudentDashboard() {
   const { data: session } = useSession()
-  const { schoolInfo } = useSchoolInfo()
+  const { schoolInfo, isIndependent, loading: schoolInfoLoading } = useSchoolInfo()
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [aiInsights, setAiInsights] = useState<AITeacherInsights | null>(null)
   const [loading, setLoading] = useState(true)
@@ -151,6 +153,7 @@ export default function StudentDashboard() {
   const [aiMessage, setAiMessage] = useState("")
   const [isAITyping, setIsAITyping] = useState(false)
   const [currentAILesson, setCurrentAILesson] = useState<any>(null)
+  const [showOnboarding, setShowOnboarding] = useState(false)
   const [chatMessages, setChatMessages] = useState<Array<{
     id: string
     role: 'user' | 'ai'
@@ -160,7 +163,9 @@ export default function StudentDashboard() {
     {
       id: '1',
       role: 'ai',
-      content: "Hello! I'm your AI Teacher. I have access to all your teacher's materials including lesson plans, schemes of work, and curriculum. How can I help you learn today?",
+      content: isIndependent 
+        ? "Hello! I'm your personal AI Teacher. Since you're learning independently, I'm here to provide personalized tutoring, create custom lessons, and guide your learning journey. What would you like to learn today?"
+        : "Hello! I'm your AI Teacher. I have access to all your teacher's materials including lesson plans, schemes of work, and curriculum. How can I help you learn today?",
       timestamp: new Date()
     }
   ])
@@ -176,6 +181,18 @@ export default function StudentDashboard() {
     
     return () => clearInterval(interval)
   }, [])
+
+  // Check if this is a new independent user
+  useEffect(() => {
+    if (!schoolInfoLoading && isIndependent && !localStorage.getItem('independent-student-onboarded')) {
+      setShowOnboarding(true)
+    }
+  }, [isIndependent, schoolInfoLoading])
+
+  const handleOnboardingComplete = () => {
+    localStorage.setItem('independent-student-onboarded', 'true')
+    setShowOnboarding(false)
+  }
 
   const fetchDashboardData = async () => {
     try {
@@ -389,9 +406,22 @@ export default function StudentDashboard() {
 
   if (!dashboardData) return null
 
+  // Show onboarding for new independent users
+  if (showOnboarding && session?.user) {
+    return (
+      <IndependentUserWelcome 
+        userRole="STUDENT"
+        userName={session.user.name || 'Student'}
+        onComplete={handleOnboardingComplete}
+      />
+    )
+  }
+
   return (
     <div className="max-w-full overflow-x-hidden">
       <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6 md:space-y-8">
+        {/* Subscription Alert */}
+        <SubscriptionAlert />
       {/* AI Teacher Header */}
       <div className="text-center bg-gradient-to-r from-blue-50 via-purple-50 to-cyan-50 rounded-2xl p-4 md:p-8 shadow-lg">
         <div className="flex flex-col sm:flex-row items-center justify-center mb-4 gap-3">

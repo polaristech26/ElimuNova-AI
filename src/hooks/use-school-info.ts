@@ -34,6 +34,7 @@ export function useSchoolInfo() {
   const [schoolInfo, setSchoolInfo] = useState<SchoolInfo | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isIndependent, setIsIndependent] = useState(false)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -64,14 +65,28 @@ export function useSchoolInfo() {
 
         const response = await fetch(endpoint)
         if (!response.ok) {
+          // If no school info found, user is independent
+          if (response.status === 404) {
+            setIsIndependent(true)
+            setSchoolInfo(null)
+            return
+          }
           throw new Error('Failed to fetch school information')
         }
 
         const data = await response.json()
         setSchoolInfo(data)
+        setIsIndependent(false)
       } catch (err) {
         console.error('Error fetching school info:', err)
-        setError(err instanceof Error ? err.message : 'Unknown error')
+        // For teachers and students, assume independent mode if school info fails
+        if (session.user.role === 'TEACHER' || session.user.role === 'STUDENT') {
+          setIsIndependent(true)
+          setSchoolInfo(null)
+          setError(null) // Clear error for independent users
+        } else {
+          setError(err instanceof Error ? err.message : 'Unknown error')
+        }
       } finally {
         setLoading(false)
       }
@@ -81,5 +96,5 @@ export function useSchoolInfo() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user?.id, session?.user?.role, status])
 
-  return { schoolInfo, loading, error }
+  return { schoolInfo, loading, error, isIndependent }
 }

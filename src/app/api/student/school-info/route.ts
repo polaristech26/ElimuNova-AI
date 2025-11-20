@@ -54,10 +54,11 @@ export async function GET() {
       )
     }
     
+    // If student has no school association, they are independent
     if (!student.school) {
-      console.log('❌ School not found for student:', student.id)
+      console.log('ℹ️ Independent student - no school association')
       return NextResponse.json(
-        { error: 'School information not found' },
+        { error: 'Independent student - no school information' },
         { status: 404 }
       )
     }

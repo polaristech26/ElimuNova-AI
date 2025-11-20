@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSchoolInfo } from '@/hooks/use-school-info'
+import { SubscriptionAlert } from '@/components/subscription/subscription-alert'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { 
@@ -320,6 +321,11 @@ export default function SchoolAdminDashboard() {
 
   return (
     <div className="max-w-full overflow-x-hidden">
+      {/* Subscription Alert */}
+      <div className="max-w-7xl mx-auto p-4 md:p-6">
+        <SubscriptionAlert />
+      </div>
+
       {/* Welcome Section */}
       <div className="mb-8">
         <h1 className="text-2xl md:text-3xl font-bold mb-2">

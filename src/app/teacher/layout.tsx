@@ -15,7 +15,8 @@ import {
   Users2,
   Presentation,
   Sparkles,
-  Mail
+  Mail,
+  CreditCard
 } from 'lucide-react'
 
 export default function TeacherLayout({
@@ -47,6 +48,7 @@ export default function TeacherLayout({
     },
     { icon: Users2, label: "Meetings", href: "/teacher/meetings" },
     { icon: Calendar, label: "Schedule", href: "/teacher/schedule" },
+    { icon: CreditCard, label: "Billing", href: "/teacher/billing" },
     { icon: Brain, label: "Hope AI", href: "/teacher/alexa" },
     { icon: BarChart3, label: "Analytics", href: "/teacher/analytics" }
   ]

@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     console.log('🔍 Looking for student with userId:', session.user.id)
     
     // Get student profile
-    const student = await prisma.student.findUnique({
+    let student = await prisma.student.findUnique({
       where: { userId: session.user.id },
       include: {
         user: true,
@@ -33,14 +33,37 @@ export async function GET(request: NextRequest) {
       }
     })
 
+    // If no student profile exists, create one for independent learning
     if (!student) {
-      console.log('❌ Student profile not found for userId:', session.user.id)
-      return NextResponse.json({ error: 'Student profile not found' }, { status: 404 })
+      console.log('🆕 Creating independent student profile for userId:', session.user.id)
+      student = await prisma.student.create({
+        data: {
+          userId: session.user.id,
+          // schoolId, teacherId, and classId are optional and will be undefined
+        },
+        include: {
+          user: true,
+          school: true,
+          teacher: {
+            include: {
+              user: true
+            }
+          },
+          class: true,
+          analytics: true
+        }
+      })
+      console.log('✅ Created independent student profile')
+    }
+
+    if (!student) {
+      console.log('❌ Failed to create or find student profile')
+      return NextResponse.json({ error: 'Failed to create student profile' }, { status: 500 })
     }
     
     console.log('✅ Found student:', student.user.email)
 
-    // Get assignments data
+    // Get assignments data (for independent students, this might be empty)
     const assignments = await prisma.assignment.findMany({
       where: {
         students: {
@@ -59,6 +82,11 @@ export async function GET(request: NextRequest) {
           where: {
             studentId: student.id
           }
+        },
+        lessonPlan: {
+          select: {
+            subject: true
+          }
         }
       },
       orderBy: {
@@ -74,29 +102,41 @@ export async function GET(request: NextRequest) {
     const endOfWeek = new Date(startOfWeek)
     endOfWeek.setDate(endOfWeek.getDate() + 7)
 
-    const studySessions = await prisma.studySession.findMany({
-      where: {
-        studentId: student.id,
-        startTime: {
-          gte: startOfWeek,
-          lt: endOfWeek
+    // Get study sessions for the current week (might be empty for new independent students)
+    let studySessions: any[] = []
+    let aiTutorSessions: any[] = []
+    
+    try {
+      studySessions = await prisma.studySession.findMany({
+        where: {
+          studentId: student.id,
+          startTime: {
+            gte: startOfWeek,
+            lt: endOfWeek
+          }
+        },
+        orderBy: {
+          startTime: 'desc'
         }
-      },
-      orderBy: {
-        startTime: 'desc'
-      }
-    })
+      })
+    } catch (error) {
+      console.log('Study sessions table might not exist, skipping...')
+    }
 
-    // Get recent AI tutor sessions
-    const aiTutorSessions = await prisma.aITutorSession.findMany({
-      where: {
-        studentId: student.id
-      },
-      orderBy: {
-        createdAt: 'desc'
-      },
-      take: 5
-    })
+    // Get recent AI tutor sessions (might be empty for new independent students)
+    try {
+      aiTutorSessions = await prisma.aITutorSession.findMany({
+        where: {
+          studentId: student.id
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        take: 5
+      })
+    } catch (error) {
+      console.log('AI tutor sessions table might not exist, skipping...')
+    }
 
     // Calculate analytics
     const totalStudyTime = studySessions.reduce((total, session) => total + session.duration, 0)
@@ -130,7 +170,8 @@ export async function GET(request: NextRequest) {
     tomorrow.setDate(tomorrow.getDate() + 1)
     tomorrow.setHours(23, 59, 59, 999)
 
-    const upcomingLessons = await prisma.schedule.findMany({
+    // Get upcoming lessons (only if student has school association)
+    const upcomingLessons = student.schoolId ? await prisma.schedule.findMany({
       where: {
         schoolId: student.schoolId,
         startTime: {
@@ -150,9 +191,9 @@ export async function GET(request: NextRequest) {
       orderBy: {
         startTime: 'asc'
       }
-    })
+    }) : []
 
-    // Update or create analytics record
+    // Update or create analytics record (safely handle if table doesn't exist)
     const analyticsData = {
       totalStudyTime: student.analytics?.totalStudyTime || 0,
       averageGrade: averageGrade,
@@ -161,17 +202,23 @@ export async function GET(request: NextRequest) {
       overdueAssignments,
       lastActiveDate: new Date(),
       weeklyGoal: student.analytics?.weeklyGoal || 300,
-      monthlyGoal: student.analytics?.monthlyGoal || 1200
+      monthlyGoal: student.analytics?.monthlyGoal || 1200,
+      streakDays: student.analytics?.streakDays || 0,
+      longestStreak: student.analytics?.longestStreak || 0
     }
 
-    await prisma.studentAnalytics.upsert({
-      where: { studentId: student.id },
-      update: analyticsData,
-      create: {
-        studentId: student.id,
-        ...analyticsData
-      }
-    })
+    try {
+      await prisma.studentAnalytics.upsert({
+        where: { studentId: student.id },
+        update: analyticsData,
+        create: {
+          studentId: student.id,
+          ...analyticsData
+        }
+      })
+    } catch (error) {
+      console.log('StudentAnalytics table might not exist, using default values...')
+    }
 
     // Prepare dashboard data
     const dashboardData = {
@@ -179,9 +226,9 @@ export async function GET(request: NextRequest) {
         id: student.id,
         name: `${student.user.firstName} ${student.user.lastName}`,
         email: student.user.email,
-        school: student.school.name,
-        teacher: `${student.teacher.user.firstName} ${student.teacher.user.lastName}`,
-        class: student.class?.name || 'Not assigned'
+        school: student.school?.name || 'Independent Learning',
+        teacher: student.teacher ? `${student.teacher.user.firstName} ${student.teacher.user.lastName}` : 'Self-directed',
+        class: student.class?.name || 'Independent Study'
       },
       stats: {
         activeAssignments: pendingAssignments,
@@ -199,7 +246,7 @@ export async function GET(request: NextRequest) {
           (assignment.submissions[0].status === 'GRADED' ? 'Completed' : 'Submitted') : 
           (assignment.dueDate < new Date() ? 'Overdue' : 'Pending'),
         grade: assignment.submissions.find(s => s.grade !== null)?.grade || null,
-        teacher: `${assignment.teacher.user.firstName} ${assignment.teacher.user.lastName}`,
+        teacher: assignment.teacher ? `${assignment.teacher.user.firstName} ${assignment.teacher.user.lastName}` : 'Self-assigned',
         subject: assignment.lessonPlan?.subject || 'General'
       })),
       upcomingLessons: upcomingLessons.map(lesson => ({
@@ -211,7 +258,7 @@ export async function GET(request: NextRequest) {
           hour: '2-digit', 
           minute: '2-digit' 
         }),
-        teacher: `${lesson.teacher.user.firstName} ${lesson.teacher.user.lastName}`,
+        teacher: lesson.teacher ? `${lesson.teacher.user.firstName} ${lesson.teacher.user.lastName}` : 'AI Teacher',
         location: lesson.location
       })),
       studySessions: studySessions.map(session => ({

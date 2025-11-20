@@ -108,6 +108,14 @@ export async function GET(request: NextRequest) {
               }
             }
           },
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true
+            }
+          },
           package: {
             select: {
               id: true,
@@ -118,12 +126,69 @@ export async function GET(request: NextRequest) {
               features: true
             }
           }
-        }
+        } as any
       }),
       prisma.subscription.count({ where })
     ])
 
     const pages = Math.ceil(total / limit)
+
+    // Calculate comprehensive billing metrics for super admin dashboard
+    let billingMetrics = {}
+    
+    if (session.user.role === 'SUPER_ADMIN') {
+      // Calculate total revenue from active subscriptions
+      const totalRevenue = await prisma.subscription.aggregate({
+        _sum: { amount: true },
+        where: { status: 'ACTIVE' as any }
+      })
+
+      // Calculate monthly revenue (subscriptions created this month)
+      const currentMonth = new Date()
+      const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1)
+      const monthlyRevenue = await prisma.subscription.aggregate({
+        _sum: { amount: true },
+        where: {
+          status: 'ACTIVE' as any,
+          createdAt: { gte: monthStart }
+        }
+      })
+
+      // Get subscription counts by status
+      const [activeSubscriptions, trialSubscriptions, totalSubscriptions] = await Promise.all([
+        prisma.subscription.count({ where: { status: 'ACTIVE' as any } }),
+        prisma.subscription.count({ where: { status: 'TRIAL' as any } }),
+        prisma.subscription.count()
+      ])
+
+      // Calculate conversion rate
+      const conversionRate = (activeSubscriptions + trialSubscriptions) > 0 
+        ? Math.round((activeSubscriptions / (activeSubscriptions + trialSubscriptions)) * 100)
+        : 0
+
+      // Get payment analytics from invoices
+      const [successfulPayments, pendingPayments] = await Promise.all([
+        prisma.invoice.count({ where: { status: 'PAID' } }),
+        prisma.invoice.count({ where: { status: 'PENDING' } })
+      ])
+
+      const totalPayments = successfulPayments + pendingPayments
+      const paymentSuccessRate = totalPayments > 0 
+        ? Math.round((successfulPayments / totalPayments) * 100)
+        : 100
+
+      billingMetrics = {
+        totalRevenue: totalRevenue._sum.amount || 0,
+        monthlyRevenue: monthlyRevenue._sum.amount || 0,
+        activeSubscriptions,
+        totalSubscriptions,
+        trialSubscriptions,
+        conversionRate,
+        successfulPayments,
+        pendingPayments,
+        paymentSuccessRate
+      }
+    }
 
     return NextResponse.json({
       subscriptions,
@@ -132,7 +197,8 @@ export async function GET(request: NextRequest) {
         limit,
         total,
         pages
-      }
+      },
+      ...billingMetrics
     })
   } catch (error) {
     console.error('Error fetching billing data:', error)

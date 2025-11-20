@@ -3,6 +3,8 @@
 import { useSchoolInfo } from '@/hooks/use-school-info'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { IndependentUserWelcome } from '@/components/onboarding/independent-user-welcome'
+import { SubscriptionAlert } from '@/components/subscription/subscription-alert'
 import { 
   BookOpen, 
   Users, 
@@ -28,6 +30,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 
 interface Meeting {
   id: string;
@@ -92,13 +95,15 @@ interface RecentActivity {
 }
 
 export default function TeacherDashboard() {
-  const { schoolInfo } = useSchoolInfo()
+  const { data: session } = useSession()
+  const { schoolInfo, isIndependent, loading: schoolInfoLoading } = useSchoolInfo()
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [statsLoading, setStatsLoading] = useState(true);
   const [activityLoading, setActivityLoading] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Fetch dashboard stats
   useEffect(() => {
@@ -218,6 +223,18 @@ export default function TeacherDashboard() {
     }
   };
 
+  // Check if this is a new independent user
+  useEffect(() => {
+    if (!schoolInfoLoading && isIndependent && !localStorage.getItem('independent-teacher-onboarded')) {
+      setShowOnboarding(true)
+    }
+  }, [isIndependent, schoolInfoLoading])
+
+  const handleOnboardingComplete = () => {
+    localStorage.setItem('independent-teacher-onboarded', 'true')
+    setShowOnboarding(false)
+  }
+
   const quickActions = [
     {
       title: 'Create Lesson Plan',
@@ -249,17 +266,33 @@ export default function TeacherDashboard() {
     }
   ]
 
+  // Show onboarding for new independent users
+  if (showOnboarding && session?.user) {
+    return (
+      <IndependentUserWelcome 
+        userRole="TEACHER"
+        userName={session.user.name || 'Teacher'}
+        onComplete={handleOnboardingComplete}
+      />
+    )
+  }
+
   return (
     <div>
+      {/* Subscription Alert */}
+      <SubscriptionAlert />
+
       {/* Welcome Section */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
           Welcome back, Teacher!
         </h1>
         <p className="text-gray-600">
-          {schoolInfo?.school?.name 
-            ? `Here's what's happening at ${schoolInfo.school.name} today.`
-            : "Here's what's happening in your classroom today."
+          {isIndependent 
+            ? "Welcome to your independent teaching workspace! Create lesson plans, manage content, and use AI tools without school restrictions."
+            : schoolInfo?.school?.name 
+              ? `Here's what's happening at ${schoolInfo.school.name} today.`
+              : "Here's what's happening in your classroom today."
           }
         </p>
       </div>

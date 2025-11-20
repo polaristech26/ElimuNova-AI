@@ -13,7 +13,8 @@ import {
   FileText,
   Trophy,
   MessageSquare,
-  Sparkles
+  Sparkles,
+  CreditCard
 } from 'lucide-react'
 
 export default function StudentLayout({
@@ -34,6 +35,7 @@ export default function StudentLayout({
     { icon: Sparkles, label: "AI Tools (Images & PPT)", href: "/student/ai-tools" },
     { icon: Trophy, label: "Progress", href: "/student/progress" },
     { icon: Calendar, label: "Schedule", href: "/student/schedule" },
+    { icon: CreditCard, label: "Billing", href: "/student/billing" },
     {
       icon: MessageSquare,
       label: "Messages",

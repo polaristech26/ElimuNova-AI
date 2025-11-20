@@ -22,6 +22,8 @@ enum SubscriptionStatus {
   INACTIVE
   CANCELLED
   EXPIRED
+  TRIAL
+  TRIAL_EXPIRED
 }
 
 enum AssignmentStatus {
@@ -88,6 +90,7 @@ model User {
   searchHistory   SearchHistory[]
   activities      Activity[]
   createdMeetings Meeting[]
+  subscriptions   Subscription[]
 
   @@map("users")
 }
@@ -144,9 +147,9 @@ model SchoolAdmin {
 model Teacher {
   id       String @id @default(cuid())
   userId   String @unique
-  schoolId String
+  schoolId String?
   user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  school   School @relation(fields: [schoolId], references: [id])
+  school   School? @relation(fields: [schoolId], references: [id])
 
   // Relationships
   students        Student[]
@@ -170,14 +173,14 @@ model Class {
   description String?
   subject     String
   grade       String
-  schoolId    String
+  schoolId    String?
   teacherId   String
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relationships
-  school    School     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  school    School?     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   teacher   Teacher    @relation(fields: [teacherId], references: [id])
   students  Student[]
   sharedAIContent SharedAIContentWithClass[]
@@ -189,12 +192,12 @@ model Class {
 model Student {
   id        String @id @default(cuid())
   userId    String @unique
-  schoolId  String
-  teacherId String
+  schoolId  String?
+  teacherId String?
   classId   String?
   user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  school    School @relation(fields: [schoolId], references: [id])
-  teacher   Teacher @relation(fields: [teacherId], references: [id])
+  school    School? @relation(fields: [schoolId], references: [id])
+  teacher   Teacher? @relation(fields: [teacherId], references: [id])
   class     Class?  @relation(fields: [classId], references: [id])
 
   // Relationships
@@ -234,7 +237,8 @@ model Package {
 
 model Subscription {
   id              String             @id @default(cuid())
-  schoolId        String
+  schoolId        String?            // Optional for independent users
+  userId          String?            // For independent user subscriptions
   packageId       String
   paymentMethodId String?
   status          SubscriptionStatus @default(ACTIVE)
@@ -244,12 +248,17 @@ model Subscription {
   type            String             @default("SUBSCRIPTION")
   paymentMethod   String             @default("MANUAL")
   transactionId   String?
+  stripeSubscriptionId String?       // Stripe subscription ID
+  stripeCustomerId String?           // Stripe customer ID
+  isTrial         Boolean            @default(false)
+  trialEndsAt     DateTime?
   notes           String?
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
 
   // Relationships
-  school        School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  school        School?        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  user          User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
   package       Package        @relation(fields: [packageId], references: [id])
   paymentMethodRef PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
   invoices      Invoice[]
