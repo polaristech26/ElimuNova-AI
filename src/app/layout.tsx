@@ -27,15 +27,14 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/favicon.ico?v=4', sizes: 'any' },
-      { url: '/elimunova.png?v=4', sizes: '32x32', type: 'image/png' },
-      { url: '/elimunova.png?v=4', sizes: '16x16', type: 'image/png' },
-      { url: '/elimunova.png?v=4', sizes: '192x192', type: 'image/png' },
-      { url: '/elimunova.png?v=4', sizes: '512x512', type: 'image/png' },
+      { url: '/elimunova.png?t=20241120', sizes: '32x32', type: 'image/png' },
+      { url: '/elimunova.png?t=20241120', sizes: '16x16', type: 'image/png' },
+      { url: '/elimunova.png?t=20241120', sizes: '192x192', type: 'image/png' },
+      { url: '/elimunova.png?t=20241120', sizes: '512x512', type: 'image/png' },
     ],
-    shortcut: '/favicon.ico?v=4',
+    shortcut: '/elimunova.png?t=20241120',
     apple: [
-      { url: '/elimunova.png?v=4', sizes: '180x180', type: 'image/png' },
+      { url: '/elimunova.png?t=20241120', sizes: '180x180', type: 'image/png' },
     ],
   },
   manifest: '/manifest.json',
@@ -55,10 +54,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="light" style={{ colorScheme: 'light' }}>
       <head>
-        <link rel="icon" href="/favicon.ico?v=4" sizes="any" />
-        <link rel="icon" href="/elimunova.png?v=4" type="image/png" />
-        <link rel="apple-touch-icon" href="/elimunova.png?v=4" />
-        <meta name="msapplication-TileImage" content="/elimunova.png?v=4" />
+        <link rel="icon" href="/elimunova.png?t=20241120" type="image/png" sizes="32x32" />
+        <link rel="icon" href="/elimunova.png?t=20241120" type="image/png" sizes="16x16" />
+        <link rel="shortcut icon" href="/elimunova.png?t=20241120" type="image/png" />
+        <link rel="apple-touch-icon" href="/elimunova.png?t=20241120" />
+        <meta name="msapplication-TileImage" content="/elimunova.png?t=20241120" />
         <meta name="msapplication-TileColor" content="#667eea" />
       </head>
       <body
