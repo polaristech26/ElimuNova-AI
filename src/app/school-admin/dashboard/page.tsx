@@ -127,7 +127,12 @@ export default function SchoolAdminDashboard() {
         setRecentActivities(data.recentActivities)
         setSchoolInfo(data.schoolInfo)
       } else {
-        console.error('Failed to fetch dashboard data')
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        console.error('Failed to fetch dashboard data:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData
+        })
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
@@ -423,21 +428,21 @@ export default function SchoolAdminDashboard() {
               </div>
               <div className="flex items-center justify-between gap-2">
                 <span className="text-sm text-gray-600 flex-shrink-0">Package</span>
-                <span className="text-sm text-green-600 font-medium truncate">{schoolInfo?.package || 'Loading...'}</span>
+                <span className="text-sm text-green-600 font-medium truncate">{schoolInfo?.subscription?.packageName || 'Loading...'}</span>
               </div>
               <div className="flex items-center justify-between gap-2">
                 <span className="text-sm text-gray-600 flex-shrink-0">Subscription</span>
                 <span className={`text-sm font-medium truncate ${
-                  schoolInfo?.subscription === 'ACTIVE' ? 'text-green-600' : 'text-red-600'
+                  schoolInfo?.subscription?.status === 'ACTIVE' ? 'text-green-600' : 'text-red-600'
                 }`}>
-                  {schoolInfo?.subscription || 'Loading...'}
+                  {schoolInfo?.subscription?.status || 'Loading...'}
                 </span>
               </div>
-              {schoolInfo?.packagePrice && schoolInfo.packagePrice > 0 && (
+              {schoolInfo?.subscription?.amount && schoolInfo.subscription.amount > 0 && (
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-sm text-gray-600 flex-shrink-0">Package Price</span>
                   <span className="text-sm text-blue-600 font-medium">
-                    {formatCurrency(schoolInfo.packagePrice)}
+                    {formatCurrency(schoolInfo.subscription.amount)}
                   </span>
                 </div>
               )}
