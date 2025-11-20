@@ -25,10 +25,20 @@ export const metadata: Metadata = {
     initialScale: 1,
     maximumScale: 1,
   },
+  icons: {
+    icon: [
+      { url: '/elimunova.png', sizes: '32x32', type: 'image/png' },
+      { url: '/elimunova.png', sizes: '16x16', type: 'image/png' },
+    ],
+    shortcut: '/elimunova.png',
+    apple: '/elimunova.png',
+  },
+  manifest: '/manifest.json',
   openGraph: {
     title: "ElimuNova AI - Intelligent Education Platform",
     description: "Transform education with AI-powered lesson plans, schemes of work, and personalized learning experiences.",
     type: "website",
+    images: ['/elimunova.png'],
   },
 };
 
