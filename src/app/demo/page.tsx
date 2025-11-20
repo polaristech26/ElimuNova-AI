@@ -1,3 +1,4 @@
+import { PublicNav } from "@/components/ui/public-nav"
 import { Logo } from "@/components/ui/logo"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -62,6 +63,7 @@ export default function DemoPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 relative overflow-hidden">
+      <div className="max-w-full overflow-x-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl elimunova-animate-float"></div>
@@ -69,32 +71,7 @@ export default function DemoPage() {
       </div>
 
       {/* Header */}
-      <header className="relative z-10 bg-white/70 backdrop-blur-md shadow-lg">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/">
-            <Logo size="md" />
-          </Link>
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/#features" className="text-gray-700 hover:elimunova-text-gradient transition-all duration-300 font-medium">
-              Features
-            </Link>
-            <Link href="/pricing" className="text-gray-700 hover:elimunova-text-gradient transition-all duration-300 font-medium">
-              Pricing
-            </Link>
-            <Link href="/about" className="text-gray-700 hover:elimunova-text-gradient transition-all duration-300 font-medium">
-              About
-            </Link>
-          </nav>
-          <div className="flex items-center space-x-4">
-            <Link href="/auth/signin">
-              <Button variant="outline" className="elimunova-glass border-white/30 text-gray-700 hover:bg-white/20">Sign In</Button>
-            </Link>
-            <Link href="/auth/signup">
-              <Button className="elimunova-button">Get Started</Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <PublicNav />
 
       {/* Hero Section */}
       <section className="relative z-10 container mx-auto px-4 py-20 text-center">
@@ -338,6 +315,7 @@ export default function DemoPage() {
           </div>
         </div>
       </footer>
+      </div>
     </div>
   )
 }

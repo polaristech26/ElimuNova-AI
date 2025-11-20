@@ -27,11 +27,16 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/elimunova.png', sizes: '32x32', type: 'image/png' },
-      { url: '/elimunova.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon.ico?v=2', sizes: 'any' },
+      { url: '/elimunova.png?v=2', sizes: '32x32', type: 'image/png' },
+      { url: '/elimunova.png?v=2', sizes: '16x16', type: 'image/png' },
+      { url: '/elimunova.png?v=2', sizes: '192x192', type: 'image/png' },
+      { url: '/elimunova.png?v=2', sizes: '512x512', type: 'image/png' },
     ],
-    shortcut: '/elimunova.png',
-    apple: '/elimunova.png',
+    shortcut: '/favicon.ico?v=2',
+    apple: [
+      { url: '/elimunova.png?v=2', sizes: '180x180', type: 'image/png' },
+    ],
   },
   manifest: '/manifest.json',
   openGraph: {
@@ -49,6 +54,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="light" style={{ colorScheme: 'light' }}>
+      <head>
+        <link rel="icon" href="/favicon.ico?v=2" sizes="any" />
+        <link rel="icon" href="/elimunova.png?v=2" type="image/png" />
+        <link rel="apple-touch-icon" href="/elimunova.png?v=2" />
+        <meta name="msapplication-TileImage" content="/elimunova.png" />
+        <meta name="msapplication-TileColor" content="#667eea" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
