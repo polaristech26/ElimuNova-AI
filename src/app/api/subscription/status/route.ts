@@ -9,8 +9,11 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
+      console.log('Subscription status: No session found')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    console.log(`Subscription status request for user: ${session.user.id} (${session.user.role})`)
 
     let userId: string | undefined
     let schoolId: string | undefined
@@ -20,6 +23,8 @@ export async function GET(request: NextRequest) {
       const teacher = await prisma.teacher.findUnique({
         where: { userId: session.user.id }
       })
+      
+      console.log(`Teacher record found:`, teacher ? { id: teacher.id, schoolId: teacher.schoolId } : 'null')
       
       if (teacher?.schoolId) {
         schoolId = teacher.schoolId
@@ -31,6 +36,8 @@ export async function GET(request: NextRequest) {
         where: { userId: session.user.id },
         include: { teacher: true }
       })
+      
+      console.log(`Student record found:`, student ? { id: student.id, schoolId: student.schoolId, teacherId: student.teacherId } : 'null')
       
       if (student?.schoolId) {
         schoolId = student.schoolId
@@ -44,14 +51,30 @@ export async function GET(request: NextRequest) {
       const schoolAdmin = await prisma.schoolAdmin.findUnique({
         where: { userId: session.user.id }
       })
+      
+      console.log(`School admin record found:`, schoolAdmin ? { id: schoolAdmin.id, schoolId: schoolAdmin.schoolId } : 'null')
       schoolId = schoolAdmin?.schoolId
     }
 
+    console.log(`Subscription context determined: userId=${userId}, schoolId=${schoolId}`)
+
     if (!userId && !schoolId) {
-      return NextResponse.json({ error: 'Unable to determine subscription context' }, { status: 400 })
+      console.error('Unable to determine subscription context for user:', {
+        userId: session.user.id,
+        role: session.user.role,
+        email: session.user.email
+      })
+      return NextResponse.json({ 
+        error: 'Unable to determine subscription context',
+        debug: {
+          userId: session.user.id,
+          role: session.user.role
+        }
+      }, { status: 400 })
     }
 
     const subscriptionInfo = await getSubscriptionStatus(userId, schoolId)
+    console.log(`Subscription info retrieved:`, subscriptionInfo)
 
     return NextResponse.json({
       subscription: subscriptionInfo,
@@ -63,8 +86,19 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('Error fetching subscription status:', error)
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      userId: session?.user?.id,
+      role: session?.user?.role
+    })
     return NextResponse.json(
-      { error: 'Failed to fetch subscription status' },
+      { 
+        error: 'Failed to fetch subscription status',
+        debug: process.env.NODE_ENV === 'development' ? {
+          message: error instanceof Error ? error.message : 'Unknown error'
+        } : undefined
+      },
       { status: 500 }
     )
   }
