@@ -56,7 +56,7 @@ export default function AboutPage() {
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl elimunova-animate-float"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-pink-400/20 to-rose-600/20 rounded-full blur-3xl elimunova-animate-float" style={{animationDelay: '2s'}}></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-pink-400/20 to-rose-600/20 rounded-full blur-3xl elimunova-animate-float" style={{ animationDelay: '2s' }}></div>
       </div>
 
       {/* Header */}
@@ -69,7 +69,7 @@ export default function AboutPage() {
             <span className="elimunova-text-gradient-rainbow">About ElimuNova AI</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            We're on a mission to transform education through the power of artificial intelligence, 
+            We're on a mission to transform education through the power of artificial intelligence,
             making quality education accessible to everyone, everywhere.
           </p>
         </div>
@@ -84,12 +84,12 @@ export default function AboutPage() {
                 <span className="elimunova-text-gradient">Our Mission</span>
               </h2>
               <p className="text-lg text-gray-600 mb-6">
-                At ElimuNova AI, we believe that every teacher deserves powerful tools to create 
-                engaging, personalized learning experiences. Our AI-powered platform empowers 
+                At ElimuNova AI, we believe that every teacher deserves powerful tools to create
+                engaging, personalized learning experiences. Our AI-powered platform empowers
                 educators to focus on what they do best - inspiring and guiding students.
               </p>
               <p className="text-lg text-gray-600 mb-8">
-                We're building the future of education, where artificial intelligence works 
+                We're building the future of education, where artificial intelligence works
                 alongside human creativity to unlock the full potential of every learner.
               </p>
               <div className="flex items-center space-x-4">
@@ -137,7 +137,7 @@ export default function AboutPage() {
               The principles that guide everything we do
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {values.map((value, index) => (
               <Card key={value.title} className="elimunova-card-gradient group hover:scale-105 transition-all duration-300 border-0">
@@ -169,7 +169,7 @@ export default function AboutPage() {
               The passionate people behind ElimuNova AI
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8">
             {team.map((member, index) => (
               <Card key={member.name} className="elimunova-card-gradient group hover:scale-105 transition-all duration-300 border-0">
@@ -206,14 +206,14 @@ export default function AboutPage() {
             </h2>
             <div className="space-y-6 text-lg text-gray-600">
               <p>
-                ElimuNova AI was born from a simple observation: teachers were spending countless hours 
+                ElimuNova AI was born from a simple observation: teachers were spending countless hours
                 on administrative tasks instead of focusing on what they love most - teaching and inspiring students.
               </p>
               <p>
-              Our founders, Dr. Mary Mwangi and Joseph Mwaura, first connected at an education technology conference where they discovered a shared commitment to transforming learning through AI. With years of experience in academia, Dr. Mary Mwangi understood the daily challenges educators face. Joseph, an innovative leader in technology, recognized AI’s potential to deliver sustainable, data-driven solutions to those challenges.
+                Our founders, Dr. Mary Mwangi and Joseph Mwaura, first connected at an education technology conference where they discovered a shared commitment to transforming learning through AI. With years of experience in academia, Dr. Mary Mwangi understood the daily challenges educators face. Joseph, an innovative leader in technology, recognized AI’s potential to deliver sustainable, data-driven solutions to those challenges.
               </p>
               <p>
-              Today, we proudly serve thousands of educators worldwide, equipping them with tools to deliver engaging, personalized, and impactful learning experiences.
+                Today, we proudly serve thousands of educators worldwide, equipping them with tools to deliver engaging, personalized, and impactful learning experiences.
               </p>
             </div>
           </div>
@@ -277,9 +277,9 @@ export default function AboutPage() {
             <p>&copy; {new Date().getFullYear()} ElimuNova AI. All rights reserved.</p>
             <p className="mt-2">
               Developed by{' '}
-              <a 
-                href="https://infinititechsolutions.org/" 
-                target="_blank" 
+              <a
+                href="https://infinititechsolutions.org/"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="elimunova-text-gradient hover:underline transition-all duration-300"
               >

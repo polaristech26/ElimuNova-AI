@@ -591,7 +591,7 @@ export default function SuperAdminDashboard() {
                       {(() => {
                         const pkg = packageOverview.packages[0]
                         return (
-                          <div className="p-4 bg-gradient-to-r from-white/70 to-blue-50/70 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200/50">
+                          <div className="p-4 bg-gradient-to-r from-white/70 to-blue-50/70 backdrop-blur-sm rounded-lg shadow-sm border-t border-gray-200/50">
                             <div className="flex items-start justify-between mb-3">
                               <div className="flex-1">
                                 <h4 className="font-semibold text-gray-900 text-lg">{pkg.name}</h4>
@@ -714,7 +714,7 @@ export default function SuperAdminDashboard() {
 
         {/* Recent Schools */}
         {!loading && (
-          <Card className="edugenius-card-gradient">
+          <Card className="border-0 edugenius-card-gradient">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle className="edugenius-text-gradient-blue">Recent Schools</CardTitle>

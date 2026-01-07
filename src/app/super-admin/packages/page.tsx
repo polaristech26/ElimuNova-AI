@@ -224,7 +224,7 @@ export default function PackagesPage() {
       </div>
 
       {/* Search and Filters */}
-      <Card className="edugenius-card-gradient">
+      <Card className="border-0 edugenius-card-gradient">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -417,7 +417,7 @@ export default function PackagesPage() {
           })}
         </div>
       ) : (
-        <Card className="edugenius-card-gradient">
+        <Card className="border-0 edugenius-card-gradient">
           <CardContent className="text-center py-12">
             <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No packages found</h3>
@@ -437,7 +437,7 @@ export default function PackagesPage() {
 
       {/* Pagination */}
       {pagination && pagination.pages > 1 && (
-        <Card className="edugenius-card-gradient">
+        <Card className="border-0 edugenius-card-gradient">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-500">

@@ -626,7 +626,7 @@ export default function StudentLessonPlansPage() {
           <select
             value={filterSubject}
             onChange={(e) => setFilterSubject(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-2 border-0 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">All Subjects</option>
             {subjects.map(subject => (
@@ -637,7 +637,7 @@ export default function StudentLessonPlansPage() {
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 border-0 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Types</option>
               {lessonTypes.map(type => (

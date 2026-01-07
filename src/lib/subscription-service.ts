@@ -64,20 +64,29 @@ export async function getSubscriptionStatus(userId?: string, schoolId?: string):
     const now = new Date()
     const daysRemaining = Math.max(0, Math.ceil((subscription.endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
     const isExpired = subscription.endDate < now
-    const isActive = (subscription.status === 'ACTIVE' || subscription.status === 'TRIAL') && !isExpired
+    
+    // Safe status checking with fallback
+    const subscriptionStatus = subscription.status as string
+    const isActive = (subscriptionStatus === 'ACTIVE' || subscriptionStatus === 'TRIAL') && !isExpired
 
     return {
       isActive,
-      isTrial: subscription.isTrial || false,
+      isTrial: (subscription as any).isTrial || subscriptionStatus === 'TRIAL',
       isExpired,
       daysRemaining,
-      status: isExpired ? 'EXPIRED' : subscription.status,
-      packageName: subscription.package.name,
-      trialEndsAt: subscription.trialEndsAt || undefined,
+      status: isExpired ? 'EXPIRED' : subscriptionStatus,
+      packageName: subscription.package?.name || 'Unknown Package',
+      trialEndsAt: (subscription as any).trialEndsAt || undefined,
       endDate: subscription.endDate
     }
   } catch (error) {
     console.error('Error in getSubscriptionStatus:', error)
+    console.error('Error details:', {
+      userId,
+      schoolId,
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      errorStack: error instanceof Error ? error.stack : undefined
+    })
     return {
       isActive: false,
       isTrial: false,
@@ -122,7 +131,7 @@ export async function startFreeTrial(userId?: string, schoolId?: string): Promis
       userId,
       schoolId,
       packageId: basicPackage.id,
-      status: 'TRIAL' as any, // Type assertion to handle enum issue
+      status: 'TRIAL' as any,
       startDate,
       endDate: trialEndDate,
       trialEndsAt: trialEndDate,
@@ -143,7 +152,6 @@ export async function hasAccess(userId?: string, schoolId?: string): Promise<boo
     return false
   }
 }
-
 // Create Stripe customer
 export async function createStripeCustomer(email: string, name: string, userId?: string, schoolId?: string) {
   const { stripe } = await import('@/lib/stripe')

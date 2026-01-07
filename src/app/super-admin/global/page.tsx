@@ -402,7 +402,7 @@ export default function GlobalSettingsPage() {
                           </Badge>
                         )}
                         {setting.isPublic && (
-                          <Badge variant="outline" className="text-green-600 border-green-600">
+                          <Badge variant="outline" className="text-green-600 border-red-600">
                             <Globe className="w-3 h-3 mr-1" />
                             Public
                           </Badge>
@@ -753,7 +753,7 @@ function EditSettingModal({ isOpen, onClose, onSubmit, setting, categories, type
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6 pb-4">
-          <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg p-4 border border-gray-200">
+          <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg p-4 border-t border-gray-200">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label className="text-sm font-medium text-gray-600">Setting Key</Label>
@@ -869,7 +869,7 @@ function ViewSettingModal({ isOpen, onClose, setting }: {
         </DialogHeader>
 
         <div className="space-y-6 pb-4">
-          <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg p-4 border border-gray-200">
+          <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg p-4 border-t border-gray-200">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label className="text-sm font-medium text-gray-600">Setting Key</Label>
@@ -890,7 +890,7 @@ function ViewSettingModal({ isOpen, onClose, setting }: {
           {setting.description && (
             <div className="space-y-2">
               <Label className="text-sm font-medium text-gray-600">Description</Label>
-              <p className="text-gray-700 bg-white rounded-lg p-3 border border-gray-200">
+              <p className="text-gray-700 bg-white rounded-lg p-3 border-t border-gray-200">
                 {setting.description}
               </p>
             </div>
@@ -898,7 +898,7 @@ function ViewSettingModal({ isOpen, onClose, setting }: {
 
           <div className="space-y-2">
             <Label className="text-sm font-medium text-gray-600">Setting Value</Label>
-            <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <div className="bg-white rounded-lg p-4 border-t border-gray-200">
               <pre className="text-sm font-mono whitespace-pre-wrap text-gray-700">
                 {formatValue(setting.value, setting.type)}
               </pre>
@@ -907,7 +907,7 @@ function ViewSettingModal({ isOpen, onClose, setting }: {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
+              <div className="flex items-center justify-between p-3 bg-white rounded-lg border-t border-gray-200">
                 <div>
                   <Label className="text-sm font-medium text-gray-600">Public Setting</Label>
                   <p className="text-xs text-gray-500">Visible to non-admin users</p>
@@ -916,7 +916,7 @@ function ViewSettingModal({ isOpen, onClose, setting }: {
                   {setting.isPublic ? 'Yes' : 'No'}
                 </Badge>
               </div>
-              <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
+              <div className="flex items-center justify-between p-3 bg-white rounded-lg border-t border-gray-200">
                 <div>
                   <Label className="text-sm font-medium text-gray-600">Editable</Label>
                   <p className="text-xs text-gray-500">Can be modified after creation</p>
@@ -927,14 +927,14 @@ function ViewSettingModal({ isOpen, onClose, setting }: {
               </div>
             </div>
             <div className="space-y-4">
-              <div className="p-3 bg-white rounded-lg border border-gray-200">
+              <div className="p-3 bg-white rounded-lg border-t border-gray-200">
                 <Label className="text-sm font-medium text-gray-600">Updated By</Label>
                 <p className="text-sm text-gray-700 mt-1">
                   {setting.updatedByUser.firstName} {setting.updatedByUser.lastName}
                 </p>
                 <p className="text-xs text-gray-500">{setting.updatedByUser.email}</p>
               </div>
-              <div className="p-3 bg-white rounded-lg border border-gray-200">
+              <div className="p-3 bg-white rounded-lg border-t border-gray-200">
                 <Label className="text-sm font-medium text-gray-600">Last Updated</Label>
                 <p className="text-sm text-gray-700 mt-1">
                   {new Date(setting.updatedAt).toLocaleString()}

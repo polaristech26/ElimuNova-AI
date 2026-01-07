@@ -138,7 +138,7 @@ export default function StudentMessagesPage() {
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Messages List */}
-        <Card className="lg:col-span-1 shadow-lg">
+        <Card className=" border-0lg:col-span-1 shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MessageSquare className="w-5 h-5" />
@@ -223,7 +223,7 @@ export default function StudentMessagesPage() {
         </Card>
 
         {/* Message Preview */}
-        <Card className="lg:col-span-2 shadow-lg">
+        <Card className=" border-0lg:col-span-2 shadow-lg">
           <CardHeader>
             <CardTitle>Message Preview</CardTitle>
             <CardDescription>Click on a message to view full details and reply</CardDescription>

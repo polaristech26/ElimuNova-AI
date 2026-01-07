@@ -344,7 +344,7 @@ export default function SecurityPage() {
         {/* Security Logs Tab */}
         <TabsContent value="logs" className="space-y-6">
           {/* Search and Filters */}
-          <Card className="edugenius-card-gradient">
+          <Card className="border-0 edugenius-card-gradient">
             <CardContent className="p-6">
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1">
@@ -423,7 +423,7 @@ export default function SecurityPage() {
                               {formatEventType(log.eventType)}
                             </Badge>
                             {log.resolved ? (
-                              <Badge variant="outline" className="text-green-600 border-green-600">
+                              <Badge variant="outline" className="text-green-600 border-red-600">
                                 <CheckCircle className="w-3 h-3 mr-1" />
                                 Resolved
                               </Badge>
@@ -493,7 +493,7 @@ export default function SecurityPage() {
         {/* Security Policies Tab */}
         <TabsContent value="policies" className="space-y-6">
           {/* Search and Filters */}
-          <Card className="edugenius-card-gradient">
+          <Card className="border-0 edugenius-card-gradient">
             <CardContent className="p-6">
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1">
@@ -554,11 +554,11 @@ export default function SecurityPage() {
                           <Badge className={getPolicyTypeColor(policy.policyType)}>
                             {formatPolicyType(policy.policyType)}
                           </Badge>
-                          <Badge variant="outline" className="text-blue-600 border-blue-600">
+                          <Badge variant="outline" className="text-blue-600 border-red-600">
                             Priority: {policy.priority}
                           </Badge>
                           {policy.isActive ? (
-                            <Badge variant="outline" className="text-green-600 border-green-600">
+                            <Badge variant="outline" className="text-green-600 border-red-600">
                               <CheckCircle className="w-3 h-3 mr-1" />
                               Active
                             </Badge>
@@ -616,7 +616,7 @@ export default function SecurityPage() {
 
       {/* Pagination */}
       {pagination && pagination.pages > 1 && (
-        <Card className="edugenius-card-gradient">
+        <Card className="border-0 edugenius-card-gradient">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-600">

@@ -677,7 +677,7 @@ export default function StudentDashboard() {
       )}
 
       {/* Quick Actions */}
-      <Card className="shadow-lg">
+      <Card className=" border-0shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center text-gray-900">
             <Zap className="w-5 h-5 mr-2 text-yellow-600" />

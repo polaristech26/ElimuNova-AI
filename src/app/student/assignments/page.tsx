@@ -275,7 +275,7 @@ export default function AssignmentsPage() {
 
       {/* AI Insights Banner */}
       {aiInsights && (
-        <Card className="bg-gradient-to-r from-blue-50 via-purple-50 to-cyan-50 shadow-lg">
+        <Card className=" border-0bg-gradient-to-r from-blue-50 via-purple-50 to-cyan-50 shadow-lg">
           <CardContent className="p-6">
             <div className="flex items-start space-x-4">
               <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
@@ -301,7 +301,7 @@ export default function AssignmentsPage() {
 
       {/* Stats Cards */}
       <div className="grid md:grid-cols-4 gap-6">
-        <Card className="bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-lg">
+        <Card className=" border-0bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-lg">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -313,7 +313,7 @@ export default function AssignmentsPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg">
+        <Card className=" border-0bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -327,7 +327,7 @@ export default function AssignmentsPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-yellow-500 to-orange-600 text-white shadow-lg">
+        <Card className=" border-0bg-gradient-to-br from-yellow-500 to-orange-600 text-white shadow-lg">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -341,7 +341,7 @@ export default function AssignmentsPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-red-500 to-pink-600 text-white shadow-lg">
+        <Card className=" border-0bg-gradient-to-br from-red-500 to-pink-600 text-white shadow-lg">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -357,7 +357,7 @@ export default function AssignmentsPage() {
       </div>
 
       {/* Filters and Actions */}
-      <Card className="shadow-lg">
+      <Card className=" border-0shadow-lg">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="flex flex-col md:flex-row gap-4 flex-1">
@@ -494,7 +494,7 @@ export default function AssignmentsPage() {
             </Card>
           ))
         ) : (
-          <Card className="shadow-lg">
+          <Card className=" border-0shadow-lg">
             <CardContent className="p-12 text-center">
               <FileText className="w-16 h-16 mx-auto mb-4 text-gray-400" />
               <h3 className="text-lg font-semibold mb-2 text-gray-600">No assignments found</h3>

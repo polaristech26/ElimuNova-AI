@@ -337,7 +337,7 @@ export default function EditLessonPlanPage() {
                 value={formData.content}
                 onChange={handleInputChange}
                 placeholder="Enter your lesson plan content..."
-                className="min-h-[400px] bg-white rounded-lg border border-gray-200 p-4 text-sm font-mono resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="min-h-[400px] bg-white rounded-lg border-0 p-4 text-sm font-mono resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               />
               
               <div className="flex flex-wrap gap-3">

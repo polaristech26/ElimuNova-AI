@@ -1,212 +1,219 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
-import { AIContentType } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    console.log('PowerPoint API: GET request received');
-    
-    const session = await getServerSession(authOptions);
-    console.log('PowerPoint API: Session check', { hasSession: !!session, userId: session?.user?.id });
-    
-    if (!session?.user?.id) {
-      console.log('PowerPoint API: Unauthorized - no session');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get teacher information
-    console.log('PowerPoint API: Looking up teacher for user', session.user.id);
-    const teacher = await prisma.teacher.findFirst({
-      where: { userId: session.user.id }
-    });
+    // Get search parameters
+    const { searchParams } = new URL(request.url)
+    const search = searchParams.get('search')
+    const subject = searchParams.get('subject')
+    const grade = searchParams.get('grade')
+
+    // Find the teacher
+    const teacher = await prisma.teacher.findUnique({
+      where: { userId: session.user.id },
+      include: { user: true }
+    })
 
     if (!teacher) {
-      console.log('PowerPoint API: Teacher not found for user', session.user.id);
-      return NextResponse.json({ error: 'Teacher not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Teacher not found' }, { status: 404 })
     }
-    
-    console.log('PowerPoint API: Found teacher', teacher.id);
 
-    const { searchParams } = new URL(req.url);
-    const search = searchParams.get('search');
-    const subject = searchParams.get('subject');
-    const grade = searchParams.get('grade');
-
-    // Build where clause
-    const where: any = {
+    // Build where clause for filtering
+    const whereClause: any = {
       teacherId: teacher.id,
-      type: AIContentType.POWERPOINT
-    };
+      type: 'POWERPOINT'
+    }
 
     if (search) {
-      where.OR = [
+      whereClause.OR = [
         { title: { contains: search, mode: 'insensitive' } },
-        { topic: { contains: search, mode: 'insensitive' } },
-        { subject: { contains: search, mode: 'insensitive' } }
-      ];
+        { subject: { contains: search, mode: 'insensitive' } },
+        { grade: { contains: search, mode: 'insensitive' } },
+        { topic: { contains: search, mode: 'insensitive' } }
+      ]
     }
 
-    if (subject && subject !== 'all') {
-      where.subject = subject;
+    if (subject) {
+      whereClause.subject = subject
     }
 
-    if (grade && grade !== 'all') {
-      where.grade = grade;
+    if (grade) {
+      whereClause.grade = grade
     }
-
-    console.log('PowerPoint API: Query where clause', where);
 
     // Fetch PowerPoint presentations
-    console.log('PowerPoint API: Executing database query...');
     const powerpoints = await prisma.aIGeneratedContent.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
+      where: whereClause,
       include: {
         teacher: {
+          include: {
+            user: true
+          }
+        },
+        _count: {
           select: {
-            id: true,
-            user: {
-              select: {
-                firstName: true,
-                lastName: true
-              }
-            }
+            sharedWithStudents: true,
+            sharedWithClasses: true
           }
         }
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+
+    // Transform the data to match the expected PowerPoint interface
+    const transformedPowerpoints = powerpoints.map((ppt: any) => ({
+      id: ppt.id,
+      title: ppt.title,
+      subject: ppt.subject,
+      grade: ppt.grade,
+      topic: ppt.topic,
+      content: typeof ppt.content === 'string' ? JSON.parse(ppt.content) : ppt.content,
+      metadata: ppt.metadata,
+      isShared: ppt.isShared,
+      createdAt: ppt.createdAt.toISOString(),
+      updatedAt: ppt.updatedAt.toISOString(),
+      teacher: {
+        id: ppt.teacher.id,
+        user: {
+          firstName: ppt.teacher.user.firstName,
+          lastName: ppt.teacher.user.lastName
+        }
       }
-    });
+    }))
 
-    console.log('PowerPoint API: Found presentations', powerpoints.length);
-
-    // Parse content for each PowerPoint
-    const parsedPowerpoints = powerpoints.map(ppt => {
-      let parsedContent;
-      try {
-        parsedContent = JSON.parse(ppt.content);
-      } catch (error) {
-        console.error('PowerPoint API: Error parsing content for PowerPoint', ppt.id, error);
-        parsedContent = {
-          title: ppt.title,
-          slides: [],
-          metadata: {}
-        };
-      }
-
-      return {
-        id: ppt.id,
-        title: ppt.title,
-        subject: ppt.subject,
-        grade: ppt.grade,
-        topic: ppt.topic,
-        content: parsedContent,
-        metadata: ppt.metadata,
-        isShared: ppt.isShared,
-        createdAt: ppt.createdAt,
-        updatedAt: ppt.updatedAt,
-        teacher: ppt.teacher
-      };
-    });
-
-    return NextResponse.json({
-      success: true,
-      powerpoints: parsedPowerpoints
-    });
+    return NextResponse.json({ 
+      powerpoints: transformedPowerpoints,
+      total: transformedPowerpoints.length
+    })
 
   } catch (error) {
-    console.error('PowerPoint API: Error fetching PowerPoint presentations:', error);
+    console.error('Error fetching PowerPoint presentations:', error)
     return NextResponse.json(
       { error: 'Failed to fetch PowerPoint presentations' },
       { status: 500 }
-    );
+    )
   }
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get teacher information
-    const teacher = await prisma.teacher.findFirst({
-      where: { userId: session.user.id }
-    });
-
-    if (!teacher) {
-      return NextResponse.json({ error: 'Teacher not found' }, { status: 404 });
-    }
-
-    const { 
-      title, 
-      description, 
-      subject, 
-      grade, 
-      topic,
-      duration,
-      slideCount,
-      slides, 
-      metadata 
-    } = await req.json();
-
-    if (!title || !subject || !grade || !topic || !slides || slides.length === 0) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
-    }
-
-    // Create PowerPoint content as JSON
-    const powerpointContent = {
+    const {
       title,
-      description: description || '',
+      description,
       subject,
       grade,
       topic,
-      duration: duration || 45,
-      slideCount: slideCount || 10,
-      slides: slides || [],
-      metadata: metadata || {}
-    };
+      duration,
+      slideCount,
+      slides,
+      metadata
+    } = await request.json()
 
+    // Validate required fields
+    if (!title || !subject || !grade || !topic) {
+      return NextResponse.json(
+        { error: 'Title, subject, grade, and topic are required' },
+        { status: 400 }
+      )
+    }
+
+    // Find the teacher
+    const teacher = await prisma.teacher.findUnique({
+      where: { userId: session.user.id }
+    })
+
+    if (!teacher) {
+      return NextResponse.json({ error: 'Teacher not found' }, { status: 404 })
+    }
+
+    // Create the PowerPoint content structure
+    const contentData = {
+      slides: slides || [],
+      duration: duration || 45,
+      slideCount: slideCount || slides?.length || 0,
+      metadata: {
+        objectives: metadata?.objectives || [],
+        difficulty: metadata?.difficulty || 'medium',
+        format: metadata?.format || 'standard',
+        generatedAt: metadata?.generatedAt || new Date().toISOString(),
+        ...metadata
+      }
+    }
+
+    // Save to database
     const powerpoint = await prisma.aIGeneratedContent.create({
       data: {
         title,
-        content: JSON.stringify(powerpointContent),
-        type: AIContentType.POWERPOINT,
+        content: JSON.stringify(contentData),
+        type: 'POWERPOINT',
         subject,
         grade,
         topic,
         metadata: {
+          description,
           duration,
-          slideCount,
-          slides,
+          slideCount: contentData.slideCount,
+          createdBy: 'ai-content-hub',
           ...metadata
         },
-        teacherId: teacher.id
+        teacherId: teacher.id,
+        isShared: false
+      },
+      include: {
+        teacher: {
+          include: {
+            user: true
+          }
+        }
       }
-    });
+    })
 
-    return NextResponse.json({
-      success: true,
-      powerpoint: {
-        id: powerpoint.id,
-        title: powerpoint.title,
-        subject: powerpoint.subject,
-        grade: powerpoint.grade,
-        topic: powerpoint.topic,
-        content: JSON.parse(powerpoint.content),
-        metadata: powerpoint.metadata,
-        createdAt: powerpoint.createdAt,
-        updatedAt: powerpoint.updatedAt
+    // Transform response to match expected format
+    const response = {
+      id: powerpoint.id,
+      title: powerpoint.title,
+      subject: powerpoint.subject,
+      grade: powerpoint.grade,
+      topic: powerpoint.topic,
+      content: contentData,
+      metadata: powerpoint.metadata,
+      isShared: powerpoint.isShared,
+      createdAt: powerpoint.createdAt.toISOString(),
+      updatedAt: powerpoint.updatedAt.toISOString(),
+      teacher: {
+        id: powerpoint.teacher.id,
+        user: {
+          firstName: powerpoint.teacher.user.firstName,
+          lastName: powerpoint.teacher.user.lastName
+        }
       }
-    });
+    }
+
+    return NextResponse.json({ 
+      powerpoint: response,
+      message: 'PowerPoint saved successfully'
+    })
 
   } catch (error) {
-    console.error('Error creating PowerPoint:', error);
+    console.error('Error saving PowerPoint:', error)
     return NextResponse.json(
-      { error: 'Failed to create PowerPoint' },
+      { error: 'Failed to save PowerPoint presentation' },
       { status: 500 }
-    );
+    )
   }
 }

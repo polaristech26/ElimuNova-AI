@@ -285,7 +285,7 @@ export default function TeacherMessagesPage() {
         {/* Message Preview */}
         <div className="lg:sticky lg:top-6 h-fit">
           {selectedMessage ? (
-            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-lg">
+            <div className="bg-white rounded-lg border-0 p-6 shadow-lg">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-lg">
@@ -323,7 +323,7 @@ export default function TeacherMessagesPage() {
               </button>
             </div>
           ) : (
-            <div className="bg-gray-50 rounded-lg border border-gray-200 p-12 text-center">
+            <div className="bg-gray-50 rounded-lg border-0 p-12 text-center">
               <Mail className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-600">Select a message to view details</p>
             </div>

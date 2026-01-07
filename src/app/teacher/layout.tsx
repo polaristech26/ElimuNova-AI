@@ -33,12 +33,7 @@ export default function TeacherLayout({
     { icon: BookOpen, label: "Lesson Plans", href: "/teacher/lesson-plans" },
     { icon: FileText, label: "Schemes of Work", href: "/teacher/schemes-of-work" },
     { icon: ClipboardList, label: "Assignments", href: "/teacher/assignments" },
-    { icon: Brain, label: "AI Content", href: "/teacher/ai-content" },
-    { icon: Sparkles, label: "AI Tools (Images & PPT)", href: "/teacher/ai-tools" },
-    { icon: FileText, label: "Rubrics", href: "/teacher/rubrics" },
-    { icon: FileText, label: "Rubric Generator", href: "/teacher/rubric-generator" },
-    { icon: Presentation, label: "PowerPoint", href: "/teacher/powerpoint" },
-    { icon: Presentation, label: "PowerPoint Generator", href: "/teacher/powerpoint-generator" },
+    { icon: Brain, label: "AI Content Hub", href: "/teacher/ai-content" },
     { icon: Users, label: "Students", href: "/teacher/students" },
     { 
       icon: Mail, 

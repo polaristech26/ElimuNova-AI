@@ -581,7 +581,7 @@ export default function BillingPage() {
                   {billing.map((subscription) => (
                     <div
                       key={subscription.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                      className="flex items-center justify-between p-4 border-0 rounded-lg hover:bg-gray-50"
                     >
                       <div className="flex items-center space-x-4">
                         <div className="flex-shrink-0">
@@ -687,7 +687,7 @@ export default function BillingPage() {
                   {paymentMethods.map((method) => (
                     <div
                       key={method.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                      className="flex items-center justify-between p-4 border-0 rounded-lg hover:bg-gray-50"
                     >
                       <div className="flex items-center space-x-4">
                         <div className="flex-shrink-0">
@@ -758,7 +758,7 @@ export default function BillingPage() {
                   {invoices.map((invoice) => (
                     <div
                       key={invoice.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                      className="flex items-center justify-between p-4 border-0 rounded-lg hover:bg-gray-50"
                     >
                       <div className="flex items-center space-x-4">
                         <div className="flex-shrink-0">

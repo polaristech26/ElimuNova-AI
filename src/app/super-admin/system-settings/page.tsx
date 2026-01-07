@@ -226,7 +226,7 @@ export default function SystemSettingsPage() {
       </div>
 
       {/* Search and Filters */}
-      <Card className="edugenius-card-gradient">
+      <Card className="border-0 edugenius-card-gradient">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -302,7 +302,7 @@ export default function SystemSettingsPage() {
                           </Badge>
                         )}
                         {setting.isPublic && (
-                          <Badge variant="outline" className="text-green-600 border-green-600">
+                          <Badge variant="outline" className="text-green-600 border-red-600">
                             <Globe className="w-3 h-3 mr-1" />
                             Public
                           </Badge>
@@ -363,7 +363,7 @@ export default function SystemSettingsPage() {
 
       {/* Pagination */}
       {pagination && pagination.pages > 1 && (
-        <Card className="edugenius-card-gradient">
+        <Card className="border-0 edugenius-card-gradient">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-600">

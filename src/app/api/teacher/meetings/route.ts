@@ -1,16 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'TEACHER') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    console.log('📅 Fetching teacher meetings...')
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user || session.user.role !== 'TEACHER') {
+      console.log('❌ Unauthorized - not a teacher')
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get teacher profile
     const teacher = await prisma.teacher.findUnique({
       where: { userId: session.user.id },
       include: { school: true }
@@ -21,7 +23,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Get query parameters
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '10');
     const includePast = searchParams.get('includePast') === 'true';
 

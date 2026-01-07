@@ -114,7 +114,7 @@ export default function StudentAssignmentDetailPage() {
         <ArrowLeft className="w-4 h-4 mr-2" /> Back to assignments
       </Button>
 
-      <Card className="shadow-lg">
+      <Card className=" border-0shadow-lg">
         <CardContent className="p-6 space-y-4">
           <div className="flex items-start justify-between">
             <div>
