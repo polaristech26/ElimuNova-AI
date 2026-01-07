@@ -103,6 +103,8 @@ interface Slide {
   order: number
   imageUrl?: string
   hasImage?: boolean
+  imageSource?: string
+  imageMessage?: string
 }
 
 interface PowerPointForm {
@@ -523,26 +525,41 @@ export default function PowerPointPage() {
           // Create image prompt from visual suggestions
           const imagePrompt = slide.visualSuggestions.join(', ') + ', educational illustration, colorful, suitable for students'
           
-          // Generate image using Stability AI
-          const imageUrl = await generateSlideImage(imagePrompt)
+          // Generate image using our API with fallback system
+          const imageResult = await generateSlideImage(imagePrompt)
           
-          if (imageUrl) {
+          if (imageResult.imageUrl) {
             slidesWithImages[i] = {
               ...slide,
-              imageUrl: imageUrl,
-              hasImage: true
+              imageUrl: imageResult.imageUrl,
+              hasImage: true,
+              imageSource: imageResult.source,
+              imageMessage: imageResult.message
             }
-            console.log(`✅ Image generated for slide: ${slide.title}`)
+            
+            if (imageResult.source === 'placeholder') {
+              console.log(`⚠️  Placeholder image used for slide: ${slide.title} - ${imageResult.message}`)
+            } else {
+              console.log(`✅ AI image generated for slide: ${slide.title} (source: ${imageResult.source})`)
+            }
           } else {
+            slidesWithImages[i] = {
+              ...slide,
+              hasImage: false
+            }
             console.log(`❌ Failed to generate image for slide: ${slide.title}`)
           }
         } catch (error) {
           console.error(`Error generating image for slide ${slide.title}:`, error)
+          slidesWithImages[i] = {
+            ...slide,
+            hasImage: false
+          }
         }
         
         // Add delay between requests to avoid rate limiting
         if (i < slidesWithImages.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 2000))
+          await new Promise(resolve => setTimeout(resolve, 1000)) // Reduced delay since we have fallbacks
         }
       }
     }
@@ -551,7 +568,7 @@ export default function PowerPointPage() {
   }
 
   // Generate individual slide image using our API
-  const generateSlideImage = async (prompt: string): Promise<string | null> => {
+  const generateSlideImage = async (prompt: string): Promise<{ imageUrl: string | null; source?: string; message?: string }> => {
     try {
       const response = await fetch('/api/ai/generate-image', {
         method: 'POST',
@@ -567,16 +584,20 @@ export default function PowerPointPage() {
 
       if (response.ok) {
         const data = await response.json()
-        return data.imageUrl || null
+        return {
+          imageUrl: data.imageUrl || null,
+          source: data.source,
+          message: data.message
+        }
       } else {
         const errorData = await response.json()
         console.error('Image generation API error:', errorData)
+        return { imageUrl: null }
       }
     } catch (error) {
       console.error('Image generation error:', error)
+      return { imageUrl: null }
     }
-    
-    return null
   }
 
   const parseGeneratedContent = (content: string): Slide[] => {
@@ -1317,16 +1338,43 @@ export default function PowerPointPage() {
                             )}
                             {slide.imageUrl && (
                               <div className="mt-2">
-                                <div className="text-xs text-gray-500 mb-1">Generated Image:</div>
+                                <div className="text-xs text-gray-500 mb-1 flex items-center gap-1">
+                                  {slide.imageSource === 'placeholder' ? (
+                                    <>
+                                      <span className="text-yellow-600">📋</span>
+                                      Placeholder Image:
+                                    </>
+                                  ) : slide.imageSource === 'stability-ai' ? (
+                                    <>
+                                      <span className="text-green-600">🎨</span>
+                                      AI Generated (Stability):
+                                    </>
+                                  ) : slide.imageSource === 'openai-dalle' ? (
+                                    <>
+                                      <span className="text-blue-600">🤖</span>
+                                      AI Generated (DALL-E):
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span className="text-gray-600">🖼️</span>
+                                      Generated Image:
+                                    </>
+                                  )}
+                                </div>
                                 <img 
                                   src={slide.imageUrl} 
                                   alt={`Image for ${slide.title}`}
                                   className="w-full max-w-xs h-32 object-cover rounded border"
                                 />
+                                {slide.imageMessage && (
+                                  <div className="text-xs text-gray-500 mt-1 italic">
+                                    {slide.imageMessage}
+                                  </div>
+                                )}
                               </div>
                             )}
                             {slide.hasImage === false && slide.visualSuggestions.length > 0 && (
-                              <div className="mt-2 p-2 bg-yellow-50 rounded text-xs text-yellow-700">
+                              <div className="mt-2 p-2 bg-red-50 rounded text-xs text-red-700">
                                 <strong>Image Generation:</strong> Failed to generate image for this slide
                               </div>
                             )}
