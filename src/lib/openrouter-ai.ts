@@ -931,6 +931,19 @@ Make the content:
     }
   }
 
+  // Generate AI content using OpenRouter
+  static async generateAIContent(prompt: string, options?: {
+    maxTokens?: number
+    temperature?: number
+    model?: string
+  }): Promise<string> {
+    const messages: OpenRouterMessage[] = [
+      { role: 'user', content: prompt }
+    ]
+
+    return await this.makeRequest(messages, options?.model)
+  }
+
   // Grade a student's submission against an assignment using OpenRouter
   static async gradeSubmission(input: {
     assignmentTitle: string
@@ -978,3 +991,6 @@ Return JSON with shape { "grade": 0-100, "feedback": "specific, constructive fee
     return { grade: 0, feedback: 'Unable to auto-grade. Teacher will review.' }
   }
 }
+
+// Export the generateAIContent function for backward compatibility
+export const generateAIContent = OpenRouterAI.generateAIContent
