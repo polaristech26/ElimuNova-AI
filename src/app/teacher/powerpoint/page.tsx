@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -156,6 +157,9 @@ const defaultSlideTypes = [
 ]
 
 export default function PowerPointPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  
   const [powerpoints, setPowerpoints] = useState<PowerPoint[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -197,7 +201,38 @@ export default function PowerPointPage() {
   const [isEditing, setIsEditing] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
-  const router = useRouter()
+
+  // Authentication check
+  useEffect(() => {
+    if (status === 'loading') return // Still loading
+    
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin')
+      return
+    }
+    
+    if (!session?.user) {
+      router.push('/auth/signin')
+      return
+    }
+  }, [session, status, router])
+
+  // Don't render anything while checking authentication
+  if (status === 'loading') {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p>Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Don't render if not authenticated
+  if (status === 'unauthenticated' || !session?.user) {
+    return null
+  }
 
   // Fetch PowerPoint presentations
   useEffect(() => {
@@ -736,7 +771,13 @@ export default function PowerPointPage() {
         setActiveTab('browse')
       } else {
         const error = await response.json()
-        alert(`Error ${isEditing ? 'updating' : 'saving'} PowerPoint: ${error.error}`)
+        
+        if (response.status === 401) {
+          alert('Authentication error: Please log in again and try saving.')
+          router.push('/auth/signin')
+        } else {
+          alert(`Error ${isEditing ? 'updating' : 'saving'} PowerPoint: ${error.error}`)
+        }
       }
     } catch (error) {
       console.error(`Error ${isEditing ? 'updating' : 'saving'} PowerPoint:`, error)
