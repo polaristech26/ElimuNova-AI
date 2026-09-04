@@ -37,7 +37,7 @@ async function testAIImageGeneration() {
 
     // Test 1: Check if OpenAI API key is working
     console.log('🔑 Testing OpenAI API Key...');
-    const openaiApiKey = "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";
+    const openaiApiKey = process.env.OPENAI_API_KEY ?? '';
     
     try {
       const response = await fetch('https://api.openai.com/v1/models', {
