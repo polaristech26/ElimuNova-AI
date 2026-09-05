@@ -4,9 +4,16 @@ import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from '@/components/ui/dialog'
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
 import {
-  Award, Search, RefreshCw, Loader2, CheckCircle2, Lock, RotateCcw, Hourglass, BadgeCheck, Banknote,
+  Award, Search, RefreshCw, Loader2, CheckCircle2, Lock, RotateCcw, Hourglass, BadgeCheck, Banknote, UserPlus,
 } from 'lucide-react'
 
 interface Senior {
@@ -39,9 +46,16 @@ export default function SeniorStudentsPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [busyId, setBusyId] = useState<string | null>(null)
+  const [showAdd, setShowAdd] = useState(false)
+  const [adding, setAdding] = useState(false)
+  const [addForm, setAddForm] = useState({
+    firstName: '', lastName: '', email: '', password: '',
+    ageBracket: '', priorEducation: '', englishLevel: '',
+  })
+  const EMPTY_FORM = { firstName: '', lastName: '', email: '', password: '', ageBracket: '', priorEducation: '', englishLevel: '' }
 
-  const fetchSeniors = useCallback(async () => {
-    setLoading(true)
+  const fetchSeniors = useCallback(async (showSpinner = true) => {
+    if (showSpinner) setLoading(true)
     try {
       const res = await fetch('/api/super-admin/senior-students')
       if (res.ok) {
@@ -57,7 +71,25 @@ export default function SeniorStudentsPage() {
     }
   }, [toast])
 
-  useEffect(() => { fetchSeniors() }, [fetchSeniors])
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch('/api/super-admin/senior-students')
+        if (res.ok) {
+          const data = await res.json()
+          if (!cancelled) setSeniors(data.seniors)
+        } else if (!cancelled) {
+          toast({ variant: 'destructive', title: 'Error', description: 'Failed to load senior students' })
+        }
+      } catch {
+        if (!cancelled) toast({ variant: 'destructive', title: 'Error', description: 'Failed to load senior students' })
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [toast])
 
   const act = async (userId: string, action: 'approve' | 'activate' | 'lock' | 'pending') => {
     setBusyId(userId)
@@ -90,6 +122,46 @@ export default function SeniorStudentsPage() {
     }
   }
 
+  const createSenior = async () => {
+    if (!addForm.firstName.trim() || !addForm.lastName.trim() || !addForm.email.trim()) {
+      toast({ variant: 'destructive', title: 'Error', description: 'First name, last name and email are required' })
+      return
+    }
+    setAdding(true)
+    try {
+      const res = await fetch('/api/super-admin/senior-students', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          firstName: addForm.firstName.trim(),
+          lastName: addForm.lastName.trim(),
+          email: addForm.email.trim(),
+          password: addForm.password || undefined,
+          ageBracket: addForm.ageBracket || undefined,
+          priorEducation: addForm.priorEducation || undefined,
+          englishLevel: addForm.englishLevel || undefined,
+        }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        toast({
+          title: 'Created',
+          description: `${data.senior.name} added (${data.username}).${data.generatedPassword ? ` Generated password: ${data.generatedPassword}` : ''}`,
+        })
+        setShowAdd(false)
+        setAddForm(EMPTY_FORM)
+        await fetchSeniors()
+      } else {
+        toast({ variant: 'destructive', title: 'Error', description: data.error })
+      }
+    } catch {
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to create senior student' })
+    } finally {
+      setAdding(false)
+    }
+  }
+
   const filtered = seniors.filter((s) =>
     `${s.name} ${s.email}`.toLowerCase().includes(search.toLowerCase())
   )
@@ -114,10 +186,16 @@ export default function SeniorStudentsPage() {
             Approve adult learners, activate cash-paid subscriptions, or lock their dashboard.
           </p>
         </div>
-        <Button variant="outline" onClick={fetchSeniors} disabled={loading}>
-          <RefreshCw className={`w-4 h-4 mr-1.5 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={() => setShowAdd(true)}>
+            <UserPlus className="w-4 h-4 mr-1.5" />
+            Add Senior Student
+          </Button>
+          <Button variant="outline" onClick={() => fetchSeniors()} disabled={loading}>
+            <RefreshCw className={`w-4 h-4 mr-1.5 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {/* Summary */}
@@ -254,6 +332,89 @@ export default function SeniorStudentsPage() {
           </div>
         </div>
       )}
+
+      {/* Add Senior Student */}
+      <Dialog open={showAdd} onOpenChange={setShowAdd}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle><UserPlus className="h-5 w-5 text-teal-600" />Add Senior Student</DialogTitle>
+            <DialogDescription>
+              Register an adult learner manually. They will appear as Pending until you approve them.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="p-6 space-y-4 overflow-y-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="sr-first">First name</Label>
+                <Input id="sr-first" value={addForm.firstName} placeholder="e.g. Jane"
+                  onChange={(e) => setAddForm((f) => ({ ...f, firstName: e.target.value }))} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="sr-last">Last name</Label>
+                <Input id="sr-last" value={addForm.lastName} placeholder="e.g. Mwangi"
+                  onChange={(e) => setAddForm((f) => ({ ...f, lastName: e.target.value }))} />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="sr-email">Email</Label>
+              <Input id="sr-email" type="email" value={addForm.email} placeholder="e.g. jane.mwangi@example.com"
+                onChange={(e) => setAddForm((f) => ({ ...f, email: e.target.value }))} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="sr-pass">Password <span className="text-slate-400 font-normal">(optional)</span></Label>
+              <Input id="sr-pass" value={addForm.password} placeholder="Leave blank to auto-generate"
+                onChange={(e) => setAddForm((f) => ({ ...f, password: e.target.value }))} />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label>Age bracket</Label>
+                <Select value={addForm.ageBracket || undefined} onValueChange={(v) => setAddForm((f) => ({ ...f, ageBracket: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="16-19">16–19</SelectItem>
+                    <SelectItem value="20-29">20–29</SelectItem>
+                    <SelectItem value="30-49">30–49</SelectItem>
+                    <SelectItem value="50+">50+</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Prior education</Label>
+                <Select value={addForm.priorEducation || undefined} onValueChange={(v) => setAddForm((f) => ({ ...f, priorEducation: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="None">None</SelectItem>
+                    <SelectItem value="Some Primary">Some Primary</SelectItem>
+                    <SelectItem value="Some Secondary">Some Secondary</SelectItem>
+                    <SelectItem value="Secondary">Secondary</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>English level</Label>
+              <Select value={addForm.englishLevel || undefined} onValueChange={(v) => setAddForm((f) => ({ ...f, englishLevel: v }))}>
+                <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Beginner">Beginner</SelectItem>
+                  <SelectItem value="Intermediate">Intermediate</SelectItem>
+                  <SelectItem value="Advanced">Advanced</SelectItem>
+                  <SelectItem value="Native">Native</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter className="border-t border-slate-100 p-4 sm:p-6">
+            <Button variant="outline" onClick={() => setShowAdd(false)} disabled={adding}>Cancel</Button>
+            <Button onClick={createSenior} disabled={adding}>
+              {adding ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <UserPlus className="h-4 w-4 mr-1.5" />}
+              {adding ? 'Creating…' : 'Create'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

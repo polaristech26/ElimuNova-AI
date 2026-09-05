@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { route } from '@/lib/api-middleware'
 import { generateUsername } from '@/lib/bulk-import'
+import { invalidateSubscriptionCache } from '@/lib/subscription-service'
 
 async function uniqueUsername(first: string, last: string): Promise<string> {
   let u = generateUsername(first, last)
@@ -111,7 +112,8 @@ export const PUT = route({ auth: 'SUPER_ADMIN' }, async (req, { params }) => {
     include: {
       schoolAdmin: true,
       teacher: true,
-      student: true
+      student: true,
+      seniorStudent: true
     }
   })
 
@@ -119,7 +121,7 @@ export const PUT = route({ auth: 'SUPER_ADMIN' }, async (req, { params }) => {
     return NextResponse.json({ error: 'User not found' }, { status: 404 })
   }
 
-  const user = await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx) => {
     if (role && role !== currentUser.role) {
       // Role changed — don't delete old role record (FK constraints on related data).
       // Just update the user's role and create/update the new role record if needed.
@@ -145,6 +147,27 @@ export const PUT = route({ auth: 'SUPER_ADMIN' }, async (req, { params }) => {
             await tx.student.create({ data: { userId: id, schoolId } })
           }
         }
+      }
+
+      // Convert a regular student into an adult (senior) learner. Old role data
+      // stays orphaned (same non-destructive policy as other role changes).
+      if (role === 'SENIOR_STUDENT') {
+        if (currentUser.seniorStudent) {
+          await tx.seniorStudent.update({
+            where: { userId: id },
+            data: { approvalStatus: 'PENDING', approvedAt: null },
+          })
+        } else {
+          await tx.seniorStudent.create({
+            data: { userId: id, selectedGEDSubjects: [], approvalStatus: 'PENDING' },
+          })
+        }
+        // Default adult-learner preferences (US / GED) — same as public signup.
+        await tx.userPreference.upsert({
+          where: { userId: id },
+          update: { country: 'US', curriculum: 'ged-hiset', language: 'en' },
+          create: { userId: id, country: 'US', curriculum: 'ged-hiset', language: 'en' },
+        })
       }
     } else if (schoolId) {
       // Same role — update school assignment on existing record
@@ -182,6 +205,10 @@ export const PUT = route({ auth: 'SUPER_ADMIN' }, async (req, { params }) => {
     return updatedUser
   })
 
+  if (role && role !== existingUser.role) {
+    await invalidateSubscriptionCache(id).catch(() => {})
+  }
+
   const userWithRelations = await prisma.user.findUnique({
     where: { id },
     include: {
@@ -214,7 +241,8 @@ export const PUT = route({ auth: 'SUPER_ADMIN' }, async (req, { params }) => {
             }
           }
         }
-      }
+      },
+      seniorStudent: true
     }
   })
 

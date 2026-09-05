@@ -1,49 +1,14 @@
 import { readFileSync } from 'fs'
 import { join } from 'path'
-// @ts-ignore - handlebars types not installed
 import Handlebars from 'handlebars'
-import nodemailer from 'nodemailer'
-import { prisma } from './prisma'
 import { logger } from './logger'
+import { sendEmail } from './email-provider'
 
 interface EmailOptions {
   to: string | string[]
   subject: string
   template: string
   data: Record<string, unknown>
-}
-
-interface SmtpConfig {
-  host: string
-  port: number
-  user: string
-  pass: string
-  from: string
-}
-
-async function getSmtpConfig(): Promise<SmtpConfig> {
-  try {
-    const keys = await prisma.systemSettings.findMany({
-      where: { key: { in: ['smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass', 'smtp_from'] } }
-    })
-    const map = new Map(keys.map(k => [k.key, k.value]))
-    return {
-      host: map.get('smtp_host') || process.env.SMTP_HOST || '',
-      port: parseInt(map.get('smtp_port') || process.env.SMTP_PORT || '587', 10),
-      user: map.get('smtp_user') || process.env.SMTP_USER || '',
-      pass: map.get('smtp_pass') || process.env.SMTP_PASS || '',
-      from: map.get('smtp_from') || process.env.SMTP_FROM || 'noreply@elimunova.com',
-    }
-  } catch (e) {
-    console.warn('[EmailService] Failed to load SMTP config from DB:', e)
-    return {
-      host: process.env.SMTP_HOST || '',
-      port: parseInt(process.env.SMTP_PORT || '587', 10),
-      user: process.env.SMTP_USER || '',
-      pass: process.env.SMTP_PASS || '',
-      from: process.env.SMTP_FROM || 'noreply@elimunova.com',
-    }
-  }
 }
 
 class EmailService {
@@ -80,190 +45,68 @@ class EmailService {
   async sendEmail(options: EmailOptions): Promise<boolean> {
     const template = this.templates.get(options.template)
 
-    if (!template) {
-      logger.warn(`Email template not found: ${options.template}`)
-      return false
+    // If template file not found, build a simple inline HTML instead of failing
+    const html = template
+      ? template({ ...options.data, year: new Date().getFullYear() })
+      : this.buildFallbackHtml(options.subject, options.data)
+
+    const to = Array.isArray(options.to) ? options.to.join(', ') : options.to
+    const result = await sendEmail({ to, subject: options.subject, html })
+    if (!result.sent) {
+      logger.info(`Email not sent (${result.method}): ${options.subject} → ${to}`)
     }
+    return result.sent
+  }
 
-    try {
-      const html = template({
-        ...options.data,
-        year: new Date().getFullYear(),
-      })
-
-      const config = await getSmtpConfig()
-      const configured = !!(config.host && config.user && config.pass)
-
-      if (configured) {
-        const transporter = nodemailer.createTransport({
-          host: config.host,
-          port: config.port,
-          secure: config.port === 465,
-          auth: { user: config.user, pass: config.pass },
-        })
-        await transporter.sendMail({
-          from: `"ElimuNova" <${config.from}>`,
-          to: Array.isArray(options.to) ? options.to.join(', ') : options.to,
-          subject: options.subject,
-          html,
-        })
-        return true
-      }
-
-      logger.info(`SMTP not configured — email logged only: ${options.subject} to ${Array.isArray(options.to) ? options.to.join(', ') : options.to}`)
-      return true
-    } catch (error) {
-      logger.error('Failed to send email', error, { template: options.template })
-      return false
-    }
+  /** Simple inline HTML for when Handlebars template files are missing */
+  private buildFallbackHtml(subject: string, data: Record<string, unknown>): string {
+    const rows = Object.entries(data)
+      .filter(([, v]) => v !== undefined && v !== null)
+      .map(([k, v]) => `<tr><td style="padding:4px 8px;color:#6b7280;font-size:13px">${k}</td><td style="padding:4px 8px;color:#111827;font-family:monospace;font-size:13px">${v}</td></tr>`)
+      .join('')
+    return `
+      <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:24px">
+        <h2 style="color:#1e40af;margin-bottom:16px">${subject}</h2>
+        <table style="border-collapse:collapse;width:100%">${rows}</table>
+        <p style="color:#9ca3af;font-size:12px;margin-top:24px">© ElimuNova AI</p>
+      </div>`
   }
 
   async sendWelcomeEmail(to: string, firstName: string) {
-    return this.sendEmail({
-      to,
-      subject: 'Welcome to ElimuNova AI!',
-      template: 'welcome',
-      data: { firstName },
-    })
+    return this.sendEmail({ to, subject: 'Welcome to ElimuNova AI!', template: 'welcome', data: { firstName } })
   }
 
-  async sendCredentialsEmail(
-    to: string,
-    firstName: string,
-    username: string,
-    password: string
-  ) {
+  async sendCredentialsEmail(to: string, firstName: string, username: string, password: string) {
     return this.sendEmail({
       to,
       subject: 'Your Credentials for ElimuNova AI',
       template: 'credentials',
-      data: { firstName, username, password },
+      data: { firstName, username, password, loginUrl: `${process.env.NEXTAUTH_URL || 'https://elimunova-ai.vercel.app'}/auth/signin` },
     })
   }
 
-  async sendPasswordResetEmail(
-    to: string,
-    firstName: string,
-    resetUrl: string
-  ) {
-    return this.sendEmail({
-      to,
-      subject: 'Reset Your ElimuNova AI Password',
-      template: 'password-reset',
-      data: { firstName, resetUrl },
-    })
+  async sendPasswordResetEmail(to: string, firstName: string, resetUrl: string) {
+    return this.sendEmail({ to, subject: 'Reset Your ElimuNova AI Password', template: 'password-reset', data: { firstName, resetUrl } })
   }
 
-  async sendInvoiceEmail(
-    to: string,
-    firstName: string,
-    invoiceNumber: string,
-    planName: string,
-    amount: number,
-    dueDate: string,
-    status: string,
-    paymentUrl: string
-  ) {
-    return this.sendEmail({
-      to,
-      subject: `Invoice ${invoiceNumber} from ElimuNova AI`,
-      template: 'invoice',
-      data: {
-        firstName,
-        invoiceNumber,
-        planName,
-        amount,
-        dueDate,
-        status,
-        paymentUrl,
-      },
-    })
+  async sendInvoiceEmail(to: string, firstName: string, invoiceNumber: string, planName: string, amount: number, dueDate: string, status: string, paymentUrl: string) {
+    return this.sendEmail({ to, subject: `Invoice ${invoiceNumber} from ElimuNova AI`, template: 'invoice', data: { firstName, invoiceNumber, planName, amount, dueDate, status, paymentUrl } })
   }
 
-  async sendSubscriptionRenewalEmail(
-    to: string,
-    firstName: string,
-    planName: string,
-    amount: number,
-    renewalDate: string,
-    billingUrl: string
-  ) {
-    return this.sendEmail({
-      to,
-      subject: 'Subscription Renewal Reminder',
-      template: 'subscription-renewal',
-      data: {
-        firstName,
-        planName,
-        amount,
-        renewalDate,
-        billingUrl,
-      },
-    })
+  async sendSubscriptionRenewalEmail(to: string, firstName: string, planName: string, amount: number, renewalDate: string, billingUrl: string) {
+    return this.sendEmail({ to, subject: 'Subscription Renewal Reminder', template: 'subscription-renewal', data: { firstName, planName, amount, renewalDate, billingUrl } })
   }
 
-  async sendTrialEndingEmail(
-    to: string,
-    firstName: string,
-    planName: string,
-    daysRemaining: number,
-    trialEndDate: string,
-    billingUrl: string
-  ) {
-    return this.sendEmail({
-      to,
-      subject: 'Your Free Trial is Ending Soon',
-      template: 'trial-ending',
-      data: {
-        firstName,
-        planName,
-        daysRemaining,
-        trialEndDate,
-        billingUrl,
-      },
-    })
+  async sendTrialEndingEmail(to: string, firstName: string, planName: string, daysRemaining: number, trialEndDate: string, billingUrl: string) {
+    return this.sendEmail({ to, subject: 'Your Free Trial is Ending Soon', template: 'trial-ending', data: { firstName, planName, daysRemaining, trialEndDate, billingUrl } })
   }
 
-  async sendIncidentAlertEmail(
-    to: string,
-    firstName: string,
-    incidentTitle: string,
-    incidentMessage: string,
-    severity: string
-  ) {
-    return this.sendEmail({
-      to,
-      subject: `[${severity}] Incident Alert: ${incidentTitle}`,
-      template: 'incident-alert',
-      data: {
-        firstName,
-        incidentTitle,
-        incidentMessage,
-        severity,
-      },
-    })
+  async sendIncidentAlertEmail(to: string, firstName: string, incidentTitle: string, incidentMessage: string, severity: string) {
+    return this.sendEmail({ to, subject: `[${severity}] Incident Alert: ${incidentTitle}`, template: 'incident-alert', data: { firstName, incidentTitle, incidentMessage, severity } })
   }
 
-  async sendNotificationEmail(
-    to: string,
-    firstName: string,
-    title: string,
-    message: string,
-    actionUrl?: string,
-    actionText?: string
-  ) {
-    return this.sendEmail({
-      to,
-      subject: title,
-      template: 'notification',
-      data: {
-        firstName,
-        notificationTitle: title,
-        notificationMessage: message,
-        actionUrl,
-        actionText,
-      },
-    })
+  async sendNotificationEmail(to: string, firstName: string, title: string, message: string, actionUrl?: string, actionText?: string) {
+    return this.sendEmail({ to, subject: title, template: 'notification', data: { firstName, notificationTitle: title, notificationMessage: message, actionUrl, actionText } })
   }
 }
 

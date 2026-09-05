@@ -8,8 +8,8 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useToast } from "@/hooks/use-toast"
 import {
-  Loader2, ArrowLeft, User, Mail, Phone, MapPin, Shield, Calendar, Activity, Key,
-  Eye, EyeOff, Copy, Check, RefreshCw, X
+  Loader2, ArrowLeft, Mail, Phone, Shield, Calendar, Activity, Key,
+  Eye, EyeOff, Copy, Check, RefreshCw, X, GraduationCap
 } from "lucide-react"
 
 interface UserDetail {
@@ -32,10 +32,10 @@ export default function SuperAdminUserDetailPage() {
   const [pwdLoading, setPwdLoading] = useState(false)
   const [pwdError, setPwdError] = useState<string | null>(null)
   const [regenerating, setRegenerating] = useState(false)
+  const [converting, setConverting] = useState(false)
   const [copied, setCopied] = useState(false)
   const [avatarError, setAvatarError] = useState(false)
 
-  useEffect(() => { setAvatarError(false) }, [user])
   const { toast } = useToast()
 
   useEffect(() => {
@@ -46,6 +46,7 @@ export default function SuperAdminUserDetailPage() {
         if (res.ok) {
           const data = await res.json()
           setUser(data.user || data)
+          setAvatarError(false)
         } else throw new Error('Not found')
       } catch { setError('User not found') }
       finally { setLoading(false) }
@@ -91,6 +92,29 @@ export default function SuperAdminUserDetailPage() {
     } finally { setRegenerating(false) }
   }
 
+  const handleConvertToSenior = async () => {
+    if (!confirm('Convert this user to a Senior Student? They become an adult learner (US / GED) and must be approved from the Senior Students page before they can sign in to the senior dashboard.')) return
+    setConverting(true)
+    try {
+      const res = await fetch(`/api/users/${userId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: 'SENIOR_STUDENT' }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setUser((prev) => (prev ? { ...prev, role: data.role } : prev))
+        setRevealedPwd(null)
+        setShowPwd(false)
+        toast({ title: 'Converted', description: 'User is now a Senior Student. Approve them from the Senior Students page.' })
+      } else {
+        toast({ title: 'Failed', description: data.error || 'Something went wrong', variant: 'destructive' })
+      }
+    } catch {
+      toast({ title: 'Failed', variant: 'destructive' })
+    } finally { setConverting(false) }
+  }
+
   const copyCredentials = () => {
     if (!user || !revealedPwd) return
     navigator.clipboard.writeText(`Email: ${user.email}\nPassword: ${revealedPwd}`)
@@ -118,7 +142,8 @@ export default function SuperAdminUserDetailPage() {
 
   const roleColors: Record<string, string> = {
     SUPER_ADMIN: 'bg-red-100 text-red-800', SCHOOL_ADMIN: 'bg-purple-100 text-purple-800',
-    TEACHER: 'bg-blue-100 text-blue-800', STUDENT: 'bg-green-100 text-green-800', PARENT: 'bg-amber-100 text-amber-800'
+    TEACHER: 'bg-blue-100 text-blue-800', STUDENT: 'bg-green-100 text-green-800', PARENT: 'bg-amber-100 text-amber-800',
+    SENIOR_STUDENT: 'bg-teal-100 text-teal-800', SENIOR_TEACHER: 'bg-indigo-100 text-indigo-800'
   }
 
   return (
@@ -154,6 +179,20 @@ export default function SuperAdminUserDetailPage() {
           </div>
           {user.school && <p className="flex items-center text-sm text-gray-500 mt-2"><Shield className="w-3.5 h-3.5 mr-1" />School: {user.school.name}</p>}
           <p className="flex items-center text-sm text-gray-500 mt-1"><Calendar className="w-3.5 h-3.5 mr-1" />Joined {new Date(user.createdAt).toLocaleDateString()}</p>
+          {user.role === 'STUDENT' && (
+            <div className="mt-4 pt-4 border-t border-slate-200/60">
+              <div className="flex flex-wrap items-center gap-3">
+                <Button size="sm" variant="outline" onClick={handleConvertToSenior} disabled={converting}
+                  className="border-amber-300 text-amber-700 hover:bg-amber-50">
+                  {converting ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <GraduationCap className="w-3.5 h-3.5 mr-1.5" />}
+                  Convert to Senior Student
+                </Button>
+              </div>
+              <p className="text-xs text-gray-400 mt-1.5">
+                Moves this user to adult learning (US / GED). They must be approved from the Senior Students page before access is granted.
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -167,7 +206,7 @@ export default function SuperAdminUserDetailPage() {
               </div>
               <div>
                 <h2 className="font-bold text-gray-900">Password Management</h2>
-                <p className="text-xs text-gray-500">View, copy, or regenerate the user's password</p>
+                <p className="text-xs text-gray-500">View, copy, or regenerate the user&apos;s password</p>
               </div>
             </div>
           </div>
@@ -177,7 +216,7 @@ export default function SuperAdminUserDetailPage() {
             {!showPwd ? (
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <Eye className="w-4 h-4 text-amber-500" />
-                <span>Password is hidden. Click "Show Password" to reveal.</span>
+                <span>Password is hidden. Click &quot;Show Password&quot; to reveal.</span>
               </div>
             ) : (
               <div className="space-y-2">
@@ -252,7 +291,7 @@ export default function SuperAdminUserDetailPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {user.securityLogs.slice(0, 20).map((log: any) => (
+                {user.securityLogs.slice(0, 20).map((log) => (
                   <TableRow key={log.id}>
                     <TableCell className="font-medium text-sm">{log.eventType.replace(/_/g, ' ')}</TableCell>
                     <TableCell><Badge variant={log.severity === 'CRITICAL' || log.severity === 'HIGH' ? 'destructive' : 'secondary'}>{log.severity}</Badge></TableCell>

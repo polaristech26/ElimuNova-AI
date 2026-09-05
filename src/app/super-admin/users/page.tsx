@@ -35,9 +35,16 @@ const ROLE_CONFIG = {
   TEACHER:      { label: 'Teacher',      icon: GraduationCap, gradient: 'from-emerald-500 to-teal-600', bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', dot: 'bg-emerald-500', ring: 'ring-emerald-200', initialsText: 'text-emerald-600' },
   STUDENT:      { label: 'Student',      icon: User,       gradient: 'from-violet-500 to-purple-600', bg: 'bg-violet-50', text: 'text-violet-700', border: 'border-violet-200', dot: 'bg-violet-500',  ring: 'ring-violet-200', initialsText: 'text-violet-600' },
   PARENT:       { label: 'Parent',       icon: Users,      gradient: 'from-amber-500 to-orange-600', bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', dot: 'bg-amber-500',  ring: 'ring-amber-200',  initialsText: 'text-amber-600' },
-} as const
+  SENIOR_STUDENT: { label: 'Senior Student', icon: GraduationCap, gradient: 'from-teal-500 to-cyan-600', bg: 'bg-teal-50', text: 'text-teal-700', border: 'border-teal-200', dot: 'bg-teal-500', ring: 'ring-teal-200', initialsText: 'text-teal-600' },
+  SENIOR_TEACHER: { label: 'Senior Teacher', icon: GraduationCap, gradient: 'from-cyan-500 to-sky-600', bg: 'bg-sky-50', text: 'text-sky-700', border: 'border-sky-200', dot: 'bg-sky-500', ring: 'ring-sky-200', initialsText: 'text-sky-600' },
+}
 
-const ROLES = ['all', 'SUPER_ADMIN', 'SCHOOL_ADMIN', 'TEACHER', 'STUDENT', 'PARENT'] as const
+const DEFAULT_ROLE = {
+  label: 'Member', icon: User, gradient: 'from-slate-500 to-slate-600', bg: 'bg-slate-50', text: 'text-slate-700',
+  border: 'border-slate-200', dot: 'bg-slate-400', ring: 'ring-slate-200', initialsText: 'text-slate-600',
+}
+
+const ROLES = ['all', 'SUPER_ADMIN', 'SCHOOL_ADMIN', 'TEACHER', 'STUDENT', 'PARENT', 'SENIOR_STUDENT', 'SENIOR_TEACHER'] as const
 
 const STAT_CARDS = [
   { key: 'total',    label: 'Total Users',   icon: Users,         gradient: 'from-blue-600 to-indigo-600', light: 'bg-blue-50' },
@@ -66,8 +73,6 @@ export default function UsersPage() {
   const [mounted, setMounted] = useState(false)
   const searchRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => { setMounted(true) }, [])
-
   useEffect(() => {
     fetch('/api/users/stats').then(r => r.ok && r.json()).then(setStats).catch(() => {})
   }, [])
@@ -95,12 +100,34 @@ export default function UsersPage() {
     } finally { setLoading(false); setRefreshing(false) }
   }, [search, roleFilter, statusFilter, pagination.limit, toast])
 
-  useEffect(() => { fetchUsers(1) }, [])
+  useEffect(() => {
+    let cancelled = false
+    const load = async () => {
+      const params = new URLSearchParams({
+        page: '1', limit: String(pagination.limit), sortBy: 'createdAt', sortOrder: 'desc',
+      })
+      try {
+        const res = await fetch(`/api/users?${params}`)
+        if (res.ok) {
+          const data = await res.json()
+          if (!cancelled) {
+            setUsers(data.users)
+            setPagination(data.pagination)
+          }
+        }
+      } catch { /* ignore */ }
+      finally {
+        if (!cancelled) { setLoading(false); setRefreshing(false); setMounted(true) }
+      }
+    }
+    load()
+    return () => { cancelled = true }
+  }, [pagination.limit])
 
   useEffect(() => {
     const t = setTimeout(() => fetchUsers(1), 400)
     return () => clearTimeout(t)
-  }, [search, roleFilter, statusFilter])
+  }, [search, roleFilter, statusFilter, fetchUsers])
 
   const handleStatusToggle = async (id: string, current: boolean) => {
     const res = await fetch(`/api/users/${id}`, {
@@ -150,7 +177,7 @@ export default function UsersPage() {
     ieb: 'IEB', waec: 'WAEC', cbse: 'CBSE', icse: 'ICSE', ib: 'IB'
   }
 
-  const roleCfg = (role: string) => (ROLE_CONFIG as any)[role] || ROLE_CONFIG.PARENT
+  const roleCfg = (role: string) => (ROLE_CONFIG as Record<string, typeof ROLE_CONFIG[keyof typeof ROLE_CONFIG]>)[role] || DEFAULT_ROLE
 
   return (
     <div className={`space-y-6 transition-all duration-500 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
@@ -228,7 +255,7 @@ export default function UsersPage() {
       <div className="flex flex-wrap items-center gap-2">
         {ROLES.map(r => {
           const active = roleFilter === r
-          const cfg = r === 'all' ? null : roleCfg(r)
+          const cfg = r === 'all' ? DEFAULT_ROLE : roleCfg(r)
           return (
             <button key={r} onClick={() => setRoleFilter(r)}
               className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border ${

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -10,7 +10,8 @@ import { useToast } from "@/hooks/use-toast"
 import { 
   Loader2, CreditCard, Calendar, DollarSign,
   Edit, Trash2, Save, Clock, User, Phone, Mail, MapPin, RefreshCw, Package,
-  Building2, Tag, Hash, Receipt, CheckCircle, AlertCircle, Ban
+  Building2, Tag, Hash, Receipt, CheckCircle, AlertCircle, Ban, Gift,
+  type LucideIcon
 } from "lucide-react"
 import { confirmToast } from '@/lib/confirm-toast'
 
@@ -37,7 +38,7 @@ interface BillingDetailsModalProps {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const config: Record<string, { bg: string; text: string; dot: string; icon: any }> = {
+  const config: Record<string, { bg: string; text: string; dot: string; icon: LucideIcon }> = {
     ACTIVE:    { bg: 'bg-emerald-50 border-emerald-200', text: 'text-emerald-700', dot: 'bg-emerald-500', icon: CheckCircle },
     PENDING:   { bg: 'bg-amber-50 border-amber-200', text: 'text-amber-700', dot: 'bg-amber-500', icon: Clock },
     CANCELLED: { bg: 'bg-red-50 border-red-200', text: 'text-red-700', dot: 'bg-red-500', icon: Ban },
@@ -50,6 +51,20 @@ function StatusBadge({ status }: { status: string }) {
       <Icon className="w-3.5 h-3.5" />
       {status}
     </span>
+  )
+}
+
+function InfoRow({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string }) {
+  return (
+    <div className="flex items-center gap-2.5 text-sm">
+      <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+        <Icon className="w-3.5 h-3.5 text-slate-500" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-xs text-slate-400">{label}</p>
+        <p className="text-sm font-medium text-slate-800 truncate">{value}</p>
+      </div>
+    </div>
   )
 }
 
@@ -70,21 +85,27 @@ export function BillingDetailsModal({ isOpen, onClose, billingId, onBillingUpdat
   const [billing, setBilling] = useState<Billing | null>(null)
   const [schools, setSchools] = useState<School[]>([])
   const [packages, setPackages] = useState<Package[]>([])
+  const [daysRemaining, setDaysRemaining] = useState(0)
   const [renewing, setRenewing] = useState(false)
   const [renewPackageId, setRenewPackageId] = useState('')
   const [renewLoading, setRenewLoading] = useState(false)
+  const [freemiumLoading, setFreemiumLoading] = useState(false)
   const [formData, setFormData] = useState({
     schoolId: '', packageId: '', startDate: '', endDate: '', amount: '',
     status: '', type: '', paymentMethod: '', transactionId: '', notes: ''
   })
 
-  const fetchBilling = async () => {
+  const loadDetails = useCallback(async (quiet = false) => {
     if (!billingId) return
-    setLoading(true)
+    if (!quiet) setLoading(true)
     try {
-      const res = await fetch(`/api/billing/${billingId}`)
-      if (res.ok) {
-        const d = await res.json()
+      const [br, sr, pr] = await Promise.all([
+        fetch(`/api/billing/${billingId}`),
+        fetch('/api/schools?limit=100'),
+        fetch('/api/packages')
+      ])
+      if (br.ok) {
+        const d = await br.json()
         setBilling(d)
         setFormData({
           schoolId: d.school?.id || '', packageId: d.package.id,
@@ -92,26 +113,21 @@ export function BillingDetailsModal({ isOpen, onClose, billingId, onBillingUpdat
           amount: d.amount.toString(), status: d.status, type: d.type,
           paymentMethod: d.paymentMethod, transactionId: d.transactionId || '', notes: d.notes || ''
         })
-
+        setDaysRemaining(Math.ceil((new Date(d.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
       } else { toast({ variant: "destructive", title: "Error", description: "Failed to fetch billing details" }) }
+      if (sr.ok) { const d = await sr.json(); setSchools(d.schools || []) }
+      if (pr.ok) { const d = await pr.json(); setPackages(d.packages || []) }
     } catch {
       toast({ variant: "destructive", title: "Error", description: "Failed to fetch billing details" })
     } finally { setLoading(false) }
-  }
-
-  const fetchData = async () => {
-    try {
-      const [sr, pr] = await Promise.all([
-        fetch('/api/schools?limit=100'), fetch('/api/packages')
-      ])
-      if (sr.ok) { const d = await sr.json(); setSchools(d.schools || []) }
-      if (pr.ok) { const d = await pr.json(); setPackages(d.packages || []) }
-    } catch { /* ignore */ }
-  }
+  }, [billingId, toast])
 
   useEffect(() => {
-    if (isOpen && billingId) { fetchBilling(); fetchData() }
-  }, [isOpen, billingId])
+    if (isOpen && billingId) {
+      const t = setTimeout(() => { loadDetails().catch(() => {}) }, 0)
+      return () => clearTimeout(t)
+    }
+  }, [isOpen, billingId, loadDetails])
 
   const handleSave = async () => {
     if (!billingId) return
@@ -157,10 +173,30 @@ export function BillingDetailsModal({ isOpen, onClose, billingId, onBillingUpdat
         const data = await res.json()
         onBillingUpdated(data.subscription); setRenewing(false); setRenewPackageId('')
         toast({ title: 'Renewed', description: 'Subscription renewed successfully!' })
-        fetchBilling()
+        loadDetails(true)
       } else { const err = await res.json(); toast({ variant: 'destructive', title: 'Error', description: err.error || 'Failed to renew' }) }
     } catch { toast({ variant: 'destructive', title: 'Error', description: 'Failed to renew' }) }
     finally { setRenewLoading(false) }
+  }
+
+  const handleAssignFreemium = async () => {
+    if (!billingId || !billing) return
+    const target = billing.user ? `${billing.user.firstName} ${billing.user.lastName}` : billing.school?.name || 'this account'
+    if (!(await confirmToast({ title: `Assign freemium (free 10-year access) to ${target}?`, description: 'This switches the subscription to the free Basic plan.', variant: 'default' }))) return
+    setFreemiumLoading(true)
+    try {
+      const res = await fetch('/api/billing/renew', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscriptionId: billingId, freemium: true })
+      })
+      if (res.ok) {
+        const data = await res.json()
+        onBillingUpdated(data.subscription); setRenewing(false); setRenewPackageId('')
+        toast({ title: 'Freemium Assigned', description: 'Freemium access granted successfully!' })
+        loadDetails(true)
+      } else { const err = await res.json(); toast({ variant: 'destructive', title: 'Error', description: err.error || 'Failed to assign freemium' }) }
+    } catch { toast({ variant: 'destructive', title: 'Error', description: 'Failed to assign freemium' }) }
+    finally { setFreemiumLoading(false) }
   }
 
   const handleInputChange = (field: string, value: string) => setFormData(prev => ({ ...prev, [field]: value }))
@@ -179,19 +215,6 @@ export function BillingDetailsModal({ isOpen, onClose, billingId, onBillingUpdat
   const isExpired = new Date(billing.endDate) < new Date()
   const isCancelled = billing.status === 'CANCELLED'
   const canRenew = isExpired || isCancelled
-  const daysRemaining = Math.ceil((new Date(billing.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-
-  const InfoRow = ({ icon: Icon, label, value }: { icon: any; label: string; value: string }) => (
-    <div className="flex items-center gap-2.5 text-sm">
-      <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
-        <Icon className="w-3.5 h-3.5 text-slate-500" />
-      </div>
-      <div className="min-w-0">
-        <p className="text-xs text-slate-400">{label}</p>
-        <p className="text-sm font-medium text-slate-800 truncate">{value}</p>
-      </div>
-    </div>
-  )
 
   const schoolInitials = billing.school?.name?.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase() || '??'
 
@@ -478,6 +501,22 @@ export function BillingDetailsModal({ isOpen, onClose, billingId, onBillingUpdat
                     <span className="text-xs text-slate-500">Last Updated</span>
                     <span className="text-sm text-slate-700">{formatDate(billing.updatedAt)}</span>
                   </div>
+
+                  {billing.isFreemium ? (
+                    <div className="pt-3 border-t border-slate-100">
+                      <div className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-semibold">
+                        <Gift className="w-4 h-4" /> Freemium (Free Access)
+                      </div>
+                      <p className="text-[11px] text-slate-400 text-center mt-2">This account already has freemium access.</p>
+                    </div>
+                  ) : (
+                    <div className="pt-3 border-t border-slate-100">
+                      <button onClick={handleAssignFreemium} disabled={freemiumLoading}
+                        className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-sm font-semibold rounded-xl transition-all shadow-sm disabled:opacity-60">
+                        {freemiumLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Gift className="w-4 h-4" />} Assign Freemium
+                      </button>
+                    </div>
+                  )}
 
                   {canRenew && !renewing && (
                     <div className="pt-3 border-t border-slate-100">

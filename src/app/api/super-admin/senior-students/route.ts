@@ -168,7 +168,90 @@ async function revokeSubscription(userId: string) {
 //   lock     — lock dashboard (student sees subscribe screen)
 //   pending  — reset to awaiting approval
 export const POST = route({ auth: 'SUPER_ADMIN' }, async (req) => {
-  const { userId, action, amount } = await req.json()
+  const body = await req.json()
+  const { userId, action, amount } = body
+
+  // create — manually register a new senior student (pending approval)
+  if (action === 'create') {
+    const { firstName, lastName, email, password, ageBracket, priorEducation, englishLevel } = body
+
+    if (!firstName || !lastName || !email) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+
+    const normalizedEmail = String(email).trim().toLowerCase()
+    const existingUser = await prisma.user.findUnique({ where: { email: normalizedEmail } })
+    if (existingUser) {
+      return NextResponse.json({ error: 'Email already exists' }, { status: 400 })
+    }
+
+    const bcrypt = await import('bcryptjs')
+    const { generatePassword: genPwd, generateUsername } = await import('@/lib/bulk-import')
+    const { encryptPassword } = await import('@/lib/password-encryption')
+    const finalPassword = password || genPwd()
+    const hashedPassword = await bcrypt.hash(finalPassword, 12)
+    const encryptedPwd = encryptPassword(finalPassword)
+
+    let username = generateUsername(firstName, lastName)
+    let suffixAttempt = 0
+    while (await prisma.user.findUnique({ where: { username } })) {
+      suffixAttempt++
+      username = generateUsername(firstName, lastName, `${Date.now().toString(36)}${suffixAttempt}`)
+    }
+
+    const user = await prisma.user.create({
+      data: {
+        username,
+        firstName,
+        lastName,
+        email: normalizedEmail,
+        password: hashedPassword,
+        address: encryptedPwd,
+        role: 'SENIOR_STUDENT',
+        isActive: true,
+      },
+    })
+
+    const senior = await prisma.seniorStudent.create({
+      data: {
+        userId: user.id,
+        selectedGEDSubjects: [],
+        approvalStatus: 'PENDING',
+        ageBracket: ageBracket || null,
+        priorEducation: priorEducation || null,
+        englishLevel: englishLevel || null,
+      },
+    })
+
+    // Default adult-learner preferences (US / GED) — same as public signup.
+    await prisma.userPreference.upsert({
+      where: { userId: user.id },
+      update: { country: 'US', curriculum: 'ged-hiset', language: 'en' },
+      create: { userId: user.id, country: 'US', curriculum: 'ged-hiset', language: 'en' },
+    })
+
+    return NextResponse.json({
+      message: 'Senior student created. Their access activates once you approve them.',
+      username: user.username,
+      generatedPassword: password ? null : finalPassword,
+      senior: {
+        id: senior.id,
+        userId: user.id,
+        name: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        isActive: user.isActive,
+        approvalStatus: senior.approvalStatus,
+        approvedAt: senior.approvedAt,
+        ageBracket: senior.ageBracket,
+        priorEducation: senior.priorEducation,
+        englishLevel: senior.englishLevel,
+        isGEDReady: senior.isGEDReady,
+        certificate: null,
+        joinedAt: user.createdAt,
+        subscription: null,
+      },
+    }, { status: 201 })
+  }
 
   if (!userId || !['approve', 'activate', 'lock', 'pending'].includes(action)) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
